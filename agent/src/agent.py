@@ -51,6 +51,7 @@ from livekit.plugins import silero, groq
 from key_pool import get_global_key_pool, PoolUnavailable
 from provider import PooledGroqLLM, next_key, failed_key, retryable, provider_notice, send_notice
 from shared_store import ProviderBudgetExceeded, provider_budget, start_worker_heartbeat, room_is_admitted
+from provider_queue import provider_turn
 from prompts import YUKI_VOICE_SYSTEM_PROMPT, YUKI_GREETING
 from kokoro_engine import KokoroLiveKitTTS
 from knowledge import LocalKnowledgeBase
@@ -82,8 +83,9 @@ class GroqWhisperSTT(stt.STT):
 
     async def _recognize_impl(self, buffer, *, language=None, conn_options=None):
         try:
-            async with asyncio.timeout(20):
-                return await self._recognize_bounded(buffer, language=language, conn_options=conn_options)
+            async with provider_turn(self._model, self.on_notice):
+                async with asyncio.timeout(20):
+                    return await self._recognize_bounded(buffer, language=language, conn_options=conn_options)
         except asyncio.CancelledError: raise
         except (APIError, groq_client.APIError, httpx.TransportError, TimeoutError, PoolUnavailable) as error:
             logger.warning('Speech recognition paused (%s; reason=%s)', type(error).__name__, getattr(error, 'reason', 'provider'))
@@ -174,7 +176,7 @@ def prewarm(proc: JobProcess):
         min_silence_duration=0.25,
     )
     get_global_key_pool()  # Missing credentials fail initialization.
-    proc.userdata["tts"] = KokoroLiveKitTTS(voice="auto", speed=1.05)
+    proc.userdata["tts"] = KokoroLiveKitTTS(voice="auto", speed=1.05, shared_url=os.getenv('YUKI_SPEECH_URL') if os.getenv('YUKI_SHARED_SPEECH') == 'true' else None)
     # Load phonemizer dictionaries and exercise actual inference before admission.
     engine = proc.userdata["tts"]
     samples, rate = engine._kokoro.create("Hello.", voice="af_bella", lang="en-us")
@@ -281,10 +283,11 @@ async def entrypoint(ctx: JobContext):
     preferences_ready = asyncio.Event()
     async def publish(message, reliable=True):
         await ctx.room.local_participant.publish_data(json.dumps({"protocol": "yuki.control.v1", **message}), reliable=reliable, topic="yuki.control", destination_identities=[owner])
-    async def notify_provider(message):
-        await publish({"type": "notice", "message": message})
-    llm_engine.on_notice = notify_provider
-    groq_stt_raw.on_notice = notify_provider
+    async def notify_provider(message, source='provider'):
+        await publish({"type": "notice", "message": message, "source": source})
+    llm_engine.on_notice = lambda message: notify_provider(message, 'response')
+    groq_stt_raw.on_notice = lambda message: notify_provider(message, 'recognition')
+    tts_engine.on_notice = lambda message: notify_provider(message, 'speech')
     tasks = set()
     def spawn(coro):
         task = asyncio.create_task(coro)
@@ -361,7 +364,7 @@ async def entrypoint(ctx: JobContext):
         llm=llm_engine,
         tts=tts_engine,
         user_away_timeout=120,
-        conn_options=SessionConnectOptions(stt_conn_options=APIConnectOptions(max_retry=0, timeout=20), llm_conn_options=APIConnectOptions(max_retry=0, timeout=20), tts_conn_options=APIConnectOptions(max_retry=0, timeout=15), max_unrecoverable_errors=0),
+        conn_options=SessionConnectOptions(stt_conn_options=APIConnectOptions(max_retry=0, timeout=65), llm_conn_options=APIConnectOptions(max_retry=0, timeout=65), tts_conn_options=APIConnectOptions(max_retry=0, timeout=45), max_unrecoverable_errors=0),
         turn_handling={
             "endpointing": {"min_delay": 0.1},
             "interruption": {"enabled": True, "min_duration": 0.2},
@@ -458,15 +461,15 @@ async def entrypoint(ctx: JobContext):
 
 
 if __name__ == "__main__":
-    server = AgentServer.from_server_options(
+    from worker_runtime import YukiAgentServer
+    server = YukiAgentServer.from_server_options(
         WorkerOptions(
             agent_name=os.getenv("LIVEKIT_AGENT_NAME", ""),
             entrypoint_fnc=entrypoint,
             request_fnc=request_job,
             prewarm_fnc=prewarm,
-            # One warm process keeps free-tier deployments light; LiveKit can
-            # add processes under load and replicas handle horizontal scale.
-            num_idle_processes=max(1, int(os.getenv("AGENT_IDLE_PROCESSES", "1"))),
+            # The parent owns speech; idle job processes would duplicate VAD/import memory.
+            num_idle_processes=max(0, int(os.getenv("AGENT_IDLE_PROCESSES", "0" if os.getenv('YUKI_SHARED_SPEECH') == 'true' else "1"))),
             initialize_process_timeout=90.0,
             port=int(os.getenv("PORT", "8081")),
             shutdown_process_timeout=20.0,

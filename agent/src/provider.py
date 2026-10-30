@@ -11,6 +11,7 @@ from livekit.agents import llm, APIConnectOptions, APIError, APIStatusError
 from livekit.plugins import groq
 from key_pool import get_global_key_pool, PoolUnavailable
 from shared_store import ProviderBudgetExceeded, provider_budget, settle_provider_budget, shared_key_cooldown, mark_shared_key_cooldown
+from provider_queue import provider_turn
 
 def request_estimate(context, tools):
     schemas = [llm.utils.build_legacy_openai_schema(tool) for tool in tools]
@@ -23,7 +24,7 @@ def bounded_context(context, tools):
     Do not mutate the session transcript or drop part of a tool-call/result pair.
     A single oversized turn is declined with a useful notice instead of truncated.
     """
-    budget = min(4096, max(256, int(os.getenv('GROQ_TPM_LIMIT', '8000'))))
+    budget = min(3072, max(256, int(os.getenv('GROQ_TPM_LIMIT', '8000'))))
     items = context.items
     instructions = [item for item in items if item.type == 'message' and item.role in ('system', 'developer')]
     conversation = [item for item in items if item not in instructions]
@@ -41,6 +42,8 @@ def provider_notice(error):
             return "Today's free allowance has been used up. Please come back tomorrow."
         if error.reason in ('request_size', 'speech_length'):
             return 'That question is too long for the free voice service. Please try a shorter question.'
+        if error.reason == 'queue':
+            return 'The reply queue is busy. Please try again in a few seconds.'
         return f'The free service needs a short pause. Please try again in {max(1, error.retry_after)} seconds.'
     return 'I could not answer that turn because the service is temporarily busy. Please try again in a moment.'
 
@@ -85,7 +88,7 @@ class PooledGroqLLM(llm.LLM):
     @property
     def provider(self): return 'groq'
     def chat(self, *, chat_ctx, tools=None, conn_options=None, **kwargs):
-        return PooledStream(self, chat_ctx=chat_ctx, tools=tools or [], conn_options=APIConnectOptions(max_retry=0, timeout=20), options=kwargs)
+        return PooledStream(self, chat_ctx=chat_ctx, tools=tools or [], conn_options=APIConnectOptions(max_retry=0, timeout=65), options=kwargs)
     def engine(self, key):
         if key not in self.engines:
             async def response_hook(response):
@@ -108,36 +111,41 @@ class PooledStream(llm.LLMStream):
         self.options = options
         super().__init__(*args, **kwargs)
     async def _run(self):
-        emitted = False
+        self._emitted = False
         try:
             context, estimate = bounded_context(self._chat_ctx, self._tools)
-            async with asyncio.timeout(20):
-                for attempt in range(min(3, self._llm.pool.total_keys)):
-                    key = await next_key(self._llm.pool)
-                    # Keep the conservative UTF-8 reservation and all hard quotas.
-                    reservation = await provider_budget(self._llm.model, estimate)
-                    usage = None
-                    try:
-                        async with self._llm.engine(key).chat(chat_ctx=context, tools=self._tools, conn_options=APIConnectOptions(max_retry=0, timeout=8), **self.options) as stream:
-                            async for chunk in stream:
-                                if chunk.usage is not None: usage = chunk.usage
-                                emitted = True
-                                self._event_ch.send_nowait(chunk)
-                        if usage is not None: await settle_provider_budget(reservation, usage.total_tokens)
-                        await send_notice(self._llm.on_notice, None)
-                        return
-                    except Exception as error:
-                        if not emitted and getattr(error, 'status_code', None) in (401, 403, 429):
-                            await settle_provider_budget(reservation, 0)
-                        await failed_key(self._llm.pool, key, error)
-                        if emitted or not retryable(error) or attempt + 1 >= min(3, self._llm.pool.total_keys): raise
+            async with provider_turn(self._llm.model, self._llm.on_notice):
+                await self._generate(context, estimate)
+                return
         except asyncio.CancelledError: raise
         except Exception as error:
             logging.getLogger('voice_agent.provider').warning('Language provider paused (%s; reason=%s)', type(error).__name__, getattr(error, 'reason', 'provider'))
             if isinstance(error, (APIError, openai.APIError, httpx.TransportError, TimeoutError, PoolUnavailable)):
-                message = 'That response was interrupted. Please ask again.' if emitted else provider_notice(error)
+                message = 'That response was interrupted. Please ask again.' if self._emitted else provider_notice(error)
                 await send_notice(self._llm.on_notice, message)
-                if not emitted:
+                if not self._emitted:
                     self._event_ch.send_nowait(llm.ChatChunk(id=str(uuid.uuid4()), delta=llm.ChoiceDelta(role='assistant', content=message)))
                 return
             raise APIError('The language provider is unavailable', retryable=False) from None
+
+    async def _generate(self, context, estimate):
+        async with asyncio.timeout(20):
+            for attempt in range(min(3, self._llm.pool.total_keys)):
+                key = await next_key(self._llm.pool)
+                # Keep the conservative UTF-8 reservation and all hard quotas.
+                reservation = await provider_budget(self._llm.model, estimate)
+                usage = None
+                try:
+                    async with self._llm.engine(key).chat(chat_ctx=context, tools=self._tools, conn_options=APIConnectOptions(max_retry=0, timeout=8), **self.options) as stream:
+                        async for chunk in stream:
+                            if chunk.usage is not None: usage = chunk.usage
+                            self._emitted = True
+                            self._event_ch.send_nowait(chunk)
+                    if usage is not None: await settle_provider_budget(reservation, usage.total_tokens)
+                    await send_notice(self._llm.on_notice, None)
+                    return
+                except Exception as error:
+                    if not self._emitted and getattr(error, 'status_code', None) in (401, 403, 429):
+                        await settle_provider_budget(reservation, 0)
+                    await failed_key(self._llm.pool, key, error)
+                    if self._emitted or not retryable(error) or attempt + 1 >= min(3, self._llm.pool.total_keys): raise

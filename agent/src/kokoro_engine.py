@@ -194,7 +194,8 @@ class KokoroLiveKitTTS(tts.TTS):
         voices_path: Optional[str] = None,
         voice: str = "af_bella",
         speed: float = 1.05,
-        sample_rate: int = 24000
+        sample_rate: int = 24000,
+        shared_url: Optional[str] = None,
     ):
         super().__init__(
             # LiveKit Agents wraps synthesize()-only providers in its
@@ -205,6 +206,17 @@ class KokoroLiveKitTTS(tts.TTS):
             sample_rate=sample_rate,
             num_channels=1,
         )
+        self.on_notice = None
+        self.shared = shared_url is not None
+        if shared_url is not None:
+            from shared_speech import RemoteKokoro
+            self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='kokoro-client')
+            self._kokoro = RemoteKokoro(shared_url, os.environ['YUKI_SPEECH_TOKEN'])
+            self.available_voices = self._kokoro.get_voices()
+            self.voice = 'af_bella' if voice == 'auto' else voice
+            self.auto_voice = voice == 'auto'
+            self.speed = max(.75, min(1.5, float(speed)))
+            return
         # Prioritize Kokoro v1.0 multilingual assets if present
         v1_model = "models/kokoro-v1.0.onnx"
         v1_voices = "models/voices-v1.0.bin"
@@ -269,6 +281,7 @@ class KokoroLiveKitTTS(tts.TTS):
 
     async def aclose(self):
         await asyncio.to_thread(self._executor.shutdown, wait=True, cancel_futures=True)
+        if self.shared: self._kokoro.close()
 
     def synthesize(
         self,
@@ -279,7 +292,7 @@ class KokoroLiveKitTTS(tts.TTS):
         return KokoroChunkedStream(
             tts=self,
             input_text=text,
-            conn_options=APIConnectOptions(max_retry=0, timeout=15)
+            conn_options=APIConnectOptions(max_retry=0, timeout=45 if self.shared else 15)
         )
 
 
@@ -336,6 +349,12 @@ class KokoroChunkedStream(tts.ChunkedStream):
 
         try:
             loop = asyncio.get_running_loop()
+            if self._tts.shared:
+                from provider import send_notice
+                def queued(position):
+                    message = f"Preparing your voice reply. {position} {'other reply is' if position == 1 else 'other replies are'} ahead." if position else None
+                    asyncio.run_coroutine_threadsafe(send_notice(self._tts.on_notice, message), loop)
+                self._tts._kokoro.on_wait = queued
             # Kokoro's ONNX API returns a complete waveform per call. Segmenting
             # at sentence boundaries lets LiveKit start playback as soon as the
             # first segment is ready instead of waiting for the whole answer.

@@ -102,13 +102,13 @@ def start_worker_heartbeat(worker):
                 try:
                     # SDK process pool exposes only fully initialized warm processes.
                     pool = worker._proc_pool
-                    ready = not worker._connecting and (pool._warmed_proc_queue.qsize() > 0 or bool(worker.active_jobs))
+                    ready = not worker._connecting and (getattr(worker, 'speech_ready', False) or pool._warmed_proc_queue.qsize() > 0 or bool(worker.active_jobs))
                     state = json.dumps({'ready': ready, 'accepting': len(worker.active_jobs) < maximum and not worker._draining, 'active': len(worker.active_jobs)})
-                    await command('SET', _worker_id, state, 'EX', 20)
-                    await command('ZADD', '{yuki}:workers', int(time.time() * 1000) + 20000, _worker_id)
+                    await command('SET', _worker_id, state, 'EX', 45)
+                    await command('ZADD', '{yuki}:workers', int(time.time() * 1000) + 45000, _worker_id)
                 except Exception:
                     import logging
                     logging.getLogger('voice_agent.readiness').warning('Readiness heartbeat unavailable')
-                await asyncio.sleep(5)
+                await asyncio.sleep(15)
         _heartbeat_task = asyncio.create_task(heartbeat(), name='yuki-worker-heartbeat')
     return _heartbeat_task

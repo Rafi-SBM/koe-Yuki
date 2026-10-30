@@ -9,7 +9,7 @@ RUN sh download_models.sh
 COPY src ./src
 COPY knowledge ./knowledge
 RUN python src/agent.py download-files && useradd --create-home --uid 1001 yuki
-ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app/src KNOWLEDGE_DIR=/app/knowledge PORT=8081 YUKI_ENV=production
+ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app/src KNOWLEDGE_DIR=/app/knowledge PORT=8081 YUKI_ENV=production YUKI_SHARED_SPEECH=true AGENT_IDLE_PROCESSES=0
 USER yuki
 EXPOSE 8081
 CMD ["python", "src/agent.py", "start"]
