@@ -1,0 +1,60 @@
+services:
+  agent:
+    build: ./agent
+    restart: unless-stopped
+    environment:
+      LIVEKIT_URL: ${LIVEKIT_URL:?Set LIVEKIT_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Set LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Set LIVEKIT_API_SECRET}
+      GROQ_API_KEYS: ${GROQ_API_KEYS:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:?Set shared controls URL}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:?Set shared controls token}
+      MAX_CONCURRENT_SESSIONS: ${MAX_CONCURRENT_SESSIONS:-1}
+      MAX_SESSION_SECONDS: ${MAX_SESSION_SECONDS:-300}
+      GROQ_RPM_LIMIT: ${GROQ_RPM_LIMIT:-20}
+      GROQ_TPM_LIMIT: ${GROQ_TPM_LIMIT:-8000}
+      DAILY_PROVIDER_REQUEST_LIMIT: ${DAILY_PROVIDER_REQUEST_LIMIT:-500}
+      GROQ_DAILY_TOKEN_LIMIT: ${GROQ_DAILY_TOKEN_LIMIT:-200000}
+      AGENT_IDLE_PROCESSES: ${AGENT_IDLE_PROCESSES:-1}
+      KOKORO_THREADS: ${KOKORO_THREADS:-2}
+      KOKORO_MODEL_PATH: /app/models/kokoro-v1.0.onnx
+      KOKORO_VOICES_PATH: /app/models/voices-v1.0.bin
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-https://cloud.langfuse.com}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
+      YUKI_ENV: production
+    expose: ["8081", "9090"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    mem_limit: 4g
+    cpus: 2
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      LIVEKIT_URL: ${LIVEKIT_URL:?Set LIVEKIT_URL}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Set LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Set LIVEKIT_API_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET:?Set a 32-byte random SESSION_SECRET}
+      APP_ORIGIN: ${APP_ORIGIN:?Set the HTTPS application origin}
+      TRUSTED_INGRESS: ${TRUSTED_INGRESS:?Set vercel or cloudflare}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:?Set shared controls URL}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:?Set shared controls token}
+      YUKI_ACCESS_CODE: ${YUKI_ACCESS_CODE:-}
+      PUBLIC_ACCESS: ${PUBLIC_ACCESS:-false}
+      ALLOW_NEW_SESSIONS: ${ALLOW_NEW_SESSIONS:-true}
+      MAX_CONCURRENT_SESSIONS: ${MAX_CONCURRENT_SESSIONS:-1}
+      MAX_SESSION_SECONDS: ${MAX_SESSION_SECONDS:-300}
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
