@@ -1,5 +1,6 @@
 """Real frontend admission for synthetic voice gates; never bypass the lease boundary."""
 import os
+import ssl
 from dataclasses import dataclass
 import aiohttp
 
@@ -21,7 +22,9 @@ class Admission:
 
 async def admit_session():
     origin=os.getenv('YUKI_TEST_ORIGIN','http://localhost:3000').rstrip('/')
-    client=aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
+    context=ssl.create_default_context()
+    if os.getenv('YUKI_TEST_CA_FILE'): context.load_verify_locations(os.environ['YUKI_TEST_CA_FILE'])
+    client=aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=context),timeout=aiohttp.ClientTimeout(total=10))
     try:
         async with client.post(origin+'/api/token',headers={'Origin':origin},json={'consent':True,'accessCode':os.getenv('YUKI_TEST_ACCESS_CODE','')}) as response:
             if response.status!=200: raise RuntimeError(f'Frontend admission failed (HTTP {response.status}); verify readiness, access policy and configured capacity')

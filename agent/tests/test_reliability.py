@@ -139,7 +139,8 @@ def test_recognition_budget_pause_keeps_pipeline_available_for_next_utterance():
             paused=await engine._recognize_impl(None)
             resumed=await engine._recognize_impl(None)
         assert paused.alternatives==[] and resumed.alternatives[0].text=='Hello'
-        assert '5 seconds' in engine.on_notice.await_args.args[0]
+        assert any('5 seconds' in str(call.args[0]) for call in engine.on_notice.await_args_list)
+        assert engine.on_notice.await_args.args==(None,)
     asyncio.run(run())
 
 def test_evaluation_exits_nonzero_on_required_failures():
@@ -236,7 +237,7 @@ def test_heartbeat_starts_without_a_load_callback_and_only_once():
                 await task
             assert [item[0] for item in commands] == ['SET', 'ZADD']
             assert json.loads(commands[0][2]) == {'ready': True, 'accepting': True, 'active': 0}
-            assert commands[0][-2:] == ('EX', 20)
+            assert commands[0][-2:] == ('EX', 45)
         finally:
             shared_store._heartbeat_task = None
     asyncio.run(run())
