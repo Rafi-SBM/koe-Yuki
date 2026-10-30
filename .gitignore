@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js Build Output
+.next/
+out/
+build/
+dist/
+
+# Python Virtual Environments & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+*.egg-info/
+.pytest_cache/
+*.tsbuildinfo
+
+# ONNX & Large Model Binary Weights (Downloaded via download_models.sh)
+agent/models/*.onnx
+agent/models/*.bin
+models/*.onnx
+models/*.bin
+
+# Environment & Secret Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS & IDE Files
+.DS_Store
+*.pem
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local disposable artifacts moved out of the source tree
+.local/
+
+# Extra notes, legacy reference docs, and guides
+Extras/
