@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+@layer tokens, base, components, utilities;
+
+@layer base {
+
+:root {
+  --background: #06080d;
+  --foreground: #f8fafc;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(18, 24, 38, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Cosmic Ambient Grid & Mesh Gradient */
+.bg-mesh-dark {
+  background-color: #06080d;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(0, 122, 255, 0.10) 0px, transparent 50%),
+    radial-gradient(at 85% 85%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 60%);
+}
+
+/* Glassmorphism primitives */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-dock {
+  background: rgba(14, 18, 28, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Glowing rings animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.45;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+}
+
+@layer tokens {
+  :root { --control-touch-size: 44px; --focus-color: #7dd3fc; --focus-width: 2px; --focus-offset: 3px; --consent-width: 640px; --consent-gap: 12px; --consent-color: #cbd5e1; --consent-font-size: 12px; --control-radius: 8px; --control-border: #64748b; --control-background: #0f172a; --motion-duration: 0s; --orb-size: 180px; --orb-color: #38bdf8; --orb-shadow: 0 0 48px #38bdf833; }
+}
+@layer base {
+  :where(button, select, input[type="password"]) { min-height: var(--control-touch-size); }
+  :where(button, select) { min-width: var(--control-touch-size); }
+  :focus-visible { outline: var(--focus-width) solid var(--focus-color); outline-offset: var(--focus-offset); }
+}
+@layer components {
+  .voice-consent { max-width: var(--consent-width); display: grid; gap: var(--consent-gap); color: var(--consent-color); font-size: var(--consent-font-size); margin-block-end: var(--consent-gap); }
+  .voice-consent__choice { display: flex; gap: var(--consent-gap); align-items: center; min-height: var(--control-touch-size); }
+  .voice-consent__code { display: flex; gap: var(--consent-gap); align-items: center; flex-wrap: wrap; }
+  .voice-consent__code input { border: 1px solid var(--control-border); border-radius: var(--control-radius); background: var(--control-background); padding-inline: var(--consent-gap); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @layer utilities { *, *::before, *::after { animation-duration: var(--motion-duration); animation-iteration-count: 1; transition-duration: var(--motion-duration); scroll-behavior: auto; } }
+}
+
+@layer components { .voice-notice__audio { min-height: var(--control-touch-size); padding-inline: var(--consent-gap); border-radius: var(--control-radius); border: 1px solid var(--control-border); } .voice-orb { width: var(--orb-size); height: var(--orb-size); border-radius: 50%; background: var(--orb-color); box-shadow: var(--orb-shadow); } }
