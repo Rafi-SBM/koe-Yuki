@@ -1,0 +1,52 @@
+{
+  "name": "voice-agent-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "node --env-file-if-exists=.env.local .next/standalone/server.js",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "postbuild": "node scripts/prepare-standalone.mjs"
+  },
+  "dependencies": {
+    "@livekit/components-react": "^2.6.8",
+    "@livekit/components-styles": "^1.1.4",
+    "clsx": "^2.1.1",
+    "livekit-client": "^2.7.4",
+    "livekit-server-sdk": "^2.9.2",
+    "lucide-react": "^1.16.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.0.2",
+    "three": "^0.174.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.13.5",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "@types/three": "^0.174.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "^30.0.1",
+    "postcss": "8.5.29",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "type": "module"
+}
