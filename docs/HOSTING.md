@@ -31,6 +31,13 @@ with a 100-request and 30,000-token daily provider budget. Per-minute controls a
 15 requests and 6,000 reserved tokens. Provider limits still apply and can be lower.
 Heartbeat traffic also consumes Redis commands.
 
+Conversation requests retain instructions and complete recent turns within a
+bounded input reservation. Temporary provider limits pause replies with a notice
+instead of disconnecting the call; later turns can retry when the allowance resets.
+Daily caps and the five-minute call deadline remain enforced. Voice previews are
+18 distinct, locally generated Kokoro samples served as static audio by Vercel;
+playing them needs no Groq request or worker session.
+
 LiveKit may scale an idle worker down. A new call explicitly dispatches it and the
 browser waits up to 90 seconds for readiness before enabling its microphone.
 LiveKit documents typical cold-start delays of 10–20 seconds; model initialization

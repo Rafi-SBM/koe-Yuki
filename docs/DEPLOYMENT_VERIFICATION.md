@@ -1,5 +1,9 @@
 # Deployed demo verification
 
+Follow-up fixes and longer conversation/preview evidence are recorded in
+[recovery verification](RECOVERY_VERIFICATION.md). The original launch evidence
+below predates those fixes.
+
 Verified 30 October 2026, India time, against
 [yuki-voice-agent.vercel.app](https://yuki-voice-agent.vercel.app).
 The frontend is on the owner's Vercel Hobby account. The Python worker is deployed

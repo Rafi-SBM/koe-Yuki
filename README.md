@@ -2,8 +2,8 @@
 
 Yuki combines a Next.js voice UI, LiveKit audio transport, Groq Whisper/LLM inference,
 and Kokoro speech synthesis on a Python worker. It supports English, Japanese,
-Mandarin Chinese, Hindi, Spanish, French, and Italian speech. Browser voice previews
-use the browser's speech engine; they are not recordings of Kokoro voices.
+Mandarin Chinese, Hindi, Spanish, French, and Italian speech. Voice previews play
+packaged samples of the actual Kokoro voices used during live calls.
 
 Personal demo: [yuki-voice-agent.vercel.app](https://yuki-voice-agent.vercel.app).
 Live calls require the owner's access code. The frontend runs on Vercel Hobby,

@@ -40,7 +40,8 @@ def main():
                         digest=hashlib.sha256(audio.readframes(audio.getnframes())).hexdigest()
                     assert digest==preview['pcmSha256']
                     page.get_by_role('button',name=f"Preview {voice['name']} {voice['lang']} voice",exact=True).click()
-                    page.wait_for_function('previewAudio.at(-1).currentTime>0.05 && !previewAudio.at(-1).paused')
+                    page.wait_for_function('() => previewAudio.at(-1).currentTime>0.05 && !previewAudio.at(-1).paused')
+                    assert page.evaluate('expected => previewAudio.at(-1).src === new URL(expected, location.href).href',preview['src'])
                     assert page.evaluate('previewAudio.slice(0,-1).every(audio=>audio.paused)')
                     expect(page.get_by_role('button',name=f"Stop {voice['name']} {voice['lang']} voice",exact=True)).to_be_visible()
                     results['previews'].append({'voice':voice['id'],'sha256':digest,'played':True})

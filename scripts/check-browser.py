@@ -60,8 +60,8 @@ def main():
                     expect(page.get_by_role('button', name='Unmute Mic', exact=False)).to_be_visible()
                     assert page.evaluate('ownedStreams.every(s => s.getAudioTracks().every(t => t.readyState === "ended" || !t.enabled))')
                     page.get_by_role('button', name='End Call', exact=False).click()
-                    page.wait_for_function('peerConnections.every(p => p.connectionState === "closed")')
-                    page.wait_for_function('ownedStreams.every(s => s.getTracks().every(t => t.readyState === "ended"))')
+                    page.wait_for_function('() => peerConnections.every(p => p.connectionState === "closed")')
+                    page.wait_for_function('() => ownedStreams.every(s => s.getTracks().every(t => t.readyState === "ended"))')
                     page.wait_for_timeout(2500)
                 results.update(live_connection=True, reconnect_keeps_mute=True, tracks_and_connections_closed=True)
             else:

@@ -1,0 +1,209 @@
+{
+  "verified_at": "2026-10-30T20:47:03.121190+05:30",
+  "origin": "https://yuki-voice-agent.vercel.app",
+  "application_source_commit": "3c8a4dfc366ceb5efa37bffb38ec73ede619cc82",
+  "frontend_deployment": {
+    "id": "dpl_248YWSiyontv841bWshH3avJB1BR",
+    "url": "https://yuki-voice-agent.vercel.app",
+    "state": "READY"
+  },
+  "worker": {
+    "id": "CA_MudVVq9fQ58V",
+    "version": "DQ9wGbTPcNnG",
+    "states": [
+      "Running"
+    ]
+  },
+  "checks": {
+    "frontend_tests": 29,
+    "python_tests": 22,
+    "python_subtests": 4,
+    "typecheck": "passed",
+    "lint": "passed",
+    "production_build": "passed",
+    "python_compilation": "passed"
+  },
+  "conversation": {
+    "passed": true,
+    "successful_turns": 10,
+    "same_admitted_room": true,
+    "recoveries": [
+      {
+        "turn": 4,
+        "wait_seconds": 57
+      },
+      {
+        "turn": 8,
+        "wait_seconds": 36
+      }
+    ],
+    "duration_seconds": 163.0,
+    "results": [
+      {
+        "turn": 1,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 2,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 3,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 4,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 5,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 6,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 7,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 8,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 9,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      },
+      {
+        "turn": 10,
+        "heard_question": true,
+        "spoken_answer": "Tokyo"
+      }
+    ]
+  },
+  "browser_recovery": {
+    "passed": true,
+    "origin": "https://yuki-voice-agent.vercel.app",
+    "pause_notice_visible_while_connected": true,
+    "spoken_question_answered_after_reset": true,
+    "same_peer_connections": true,
+    "notice_cleared": true,
+    "tracks_closed": true,
+    "page_errors": []
+  },
+  "voice_previews": {
+    "origin": "https://yuki-voice-agent.vercel.app",
+    "previews": [
+      {
+        "voice": "auto",
+        "sha256": "e973bdee182817ddd08f869f027351a5606598fc51e22f677ed23d5edf1ba938",
+        "played": true
+      },
+      {
+        "voice": "jf_alpha",
+        "sha256": "e052727232af4a8d38b1424e7a55a097d7611308c26b8f72e180975085e8a519",
+        "played": true
+      },
+      {
+        "voice": "jf_gongitsune",
+        "sha256": "e5b689950749d8fbda313c42817ed23e04e2dc12d5ea5f275a43e148bb1beab8",
+        "played": true
+      },
+      {
+        "voice": "jm_kumo",
+        "sha256": "005bf5b8a331c14d1887a398abe1f7e284d6cf3da7bbce69f5c81995c2f8633a",
+        "played": true
+      },
+      {
+        "voice": "af_bella",
+        "sha256": "aec664d031d1a60437add88b092aac0645e8f13aa6723f0fc00a4ac5e02def3e",
+        "played": true
+      },
+      {
+        "voice": "af_sarah",
+        "sha256": "99fff67068d49621aa8ba28f604934925711fd15b79c2a1302606bf9baf57e1a",
+        "played": true
+      },
+      {
+        "voice": "am_adam",
+        "sha256": "2234595cd6a62e8facae9b5026b59e6b4ae4c3a2daa9585c4fc4d826fba540c8",
+        "played": true
+      },
+      {
+        "voice": "am_michael",
+        "sha256": "2615178d9290c2819016155c694374bd90d5dffeebbc1adca2cdb6daf7de6a19",
+        "played": true
+      },
+      {
+        "voice": "bf_emma",
+        "sha256": "7ac35268a88b66f0def8d924e58a6b4a066282e5e1016ff73ce733e371f80b14",
+        "played": true
+      },
+      {
+        "voice": "bm_george",
+        "sha256": "459ab679791dec8c0cfec38af74ee94c88169b05dd4ac36cda53a7992cd4b3c4",
+        "played": true
+      },
+      {
+        "voice": "ef_dora",
+        "sha256": "57984d552cc4eefabab2518a085e1c215d12761e8b62627a89fa8c85f09922ad",
+        "played": true
+      },
+      {
+        "voice": "em_alex",
+        "sha256": "03b873c3c5fd8325a7ce9d6a1561eb144c657f7e5c29a1264051ebade1edce2a",
+        "played": true
+      },
+      {
+        "voice": "ff_siwis",
+        "sha256": "9559b44947827333e638c13c74b94c1d08ccad05309966b3304b5b66ccf88b4d",
+        "played": true
+      },
+      {
+        "voice": "hf_alpha",
+        "sha256": "c3738ed64dfc663aea687b4d3b72e7fccdbfb28fc8d21a67cabaa09fe3aeeca4",
+        "played": true
+      },
+      {
+        "voice": "hm_omega",
+        "sha256": "67f39992b3530802e241b6a0ca9e8f4607f12157a1006f0796900f5308e64965",
+        "played": true
+      },
+      {
+        "voice": "zf_xiaobei",
+        "sha256": "11c92db8a757db6286f7b63e79eabcb44ed99b07a192f69b0f13c2ba08d90106",
+        "played": true
+      },
+      {
+        "voice": "zm_yunjian",
+        "sha256": "78a15350dd18e56ace725721185912f9da8ba5af07b1c208a431f8f993d020c7",
+        "played": true
+      },
+      {
+        "voice": "if_sara",
+        "sha256": "521bd014f3796f008e47f1b559a390810b9a5d5393b4ebb27d7d4fc5e88a603b",
+        "played": true
+      }
+    ],
+    "passed": true,
+    "previous_audio_stopped": true,
+    "modal_close_stopped_audio": true,
+    "page_errors": []
+  },
+  "health": {
+    "status": "ready",
+    "service": "yuki",
+    "timestamp": "2026-10-30T15:17:02.967Z"
+  },
+  "cost_controls": "Existing free plans and quotas unchanged; no paid upgrade or new hosted service."
+}
