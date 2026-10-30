@@ -1,0 +1,165 @@
+{
+  "verified_at": "2026-10-30T19:58:41.501032+05:30",
+  "origin": "https://yuki-voice-agent.vercel.app",
+  "frontend": {
+    "provider": "Vercel",
+    "account": "rafi-luffys-projects",
+    "plan": "Hobby",
+    "node_version": "24.x",
+    "deployment_id": "dpl_6EAAecyY1xQihpCGKJux1qFrKRCB",
+    "ready_state": "READY",
+    "tests_passed": 25,
+    "typecheck": "passed",
+    "lint": "passed",
+    "production_build": "passed",
+    "npm_audit_known_vulnerabilities": 0
+  },
+  "worker": {
+    "provider": "LiveKit Cloud",
+    "plan": "Build (owner confirmed)",
+    "agent_id": "CA_MudVVq9fQ58V",
+    "agent_name": "yuki",
+    "version": "65cfMZoyVxRX",
+    "regions": [
+      "ap-south"
+    ],
+    "states": [
+      "Running"
+    ],
+    "source_commit": "283069f884dd47b1c1500ffebc9c1a7b2ea21c2a",
+    "agents_sdk": "1.8.10",
+    "tests_passed": 18,
+    "subtests_passed": 4,
+    "pip_check": "passed",
+    "pip_audit_packages": 121,
+    "pip_audit_known_vulnerabilities": 0
+  },
+  "other_services": {
+    "redis": "Upstash Free, owner confirmed claimed",
+    "inference": "Groq Free, owner confirmed"
+  },
+  "limits": {
+    "concurrent_calls": 1,
+    "call_seconds": 300,
+    "daily_provider_requests": 100,
+    "daily_provider_tokens": 30000,
+    "provider_rpm": 15,
+    "provider_tpm": 6000,
+    "cloud_startup_handshake_timeout_ms": 90000
+  },
+  "live_voice": {
+    "users": 1,
+    "passed": 1,
+    "p50_first_audio_ms": 2332,
+    "p95_first_audio_ms": 2332,
+    "latency_budget_ms": 5000,
+    "gate_passed": true,
+    "results": [
+      {
+        "user": 0,
+        "ok": true,
+        "startup_ms": 8229,
+        "first_audio_ms": 2332,
+        "audible_frames": 52,
+        "answer": "Tokyo.",
+        "settings_ack": true
+      }
+    ]
+  },
+  "interruption": {
+    "passed": true,
+    "interruption_stop_ms": 109,
+    "followup_answer": "Tokyo",
+    "recognized_interruption": true
+  },
+  "browser_regressions": {
+    "origin": "http://localhost:3001",
+    "mode": "browser-regression",
+    "consent_before_admission": true,
+    "preferences_focus_escape": true,
+    "diagnostic_failure_handled": true,
+    "sandbox_mute_and_cleanup": true,
+    "mobile_no_overflow": true,
+    "reduced_motion": true,
+    "page_errors": [],
+    "passed": true
+  },
+  "deployed_browser": {
+    "origin": "https://yuki-voice-agent.vercel.app",
+    "mode": "live",
+    "consent_before_admission": true,
+    "live_connection": true,
+    "reconnect_keeps_mute": true,
+    "tracks_and_connections_closed": true,
+    "mobile_no_overflow": true,
+    "reduced_motion": true,
+    "page_errors": [],
+    "passed": true
+  },
+  "admission": {
+    "missing_consent": 400,
+    "capacity": 429,
+    "cross_owner_cleanup": 403,
+    "owner_cleanup": 200
+  },
+  "languages": {
+    "passed": true,
+    "languages": {
+      "en-us": {
+        "samples": 44544,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "ja": {
+        "samples": 66560,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "cmn": {
+        "samples": 57344,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "hi": {
+        "samples": 69120,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "es": {
+        "samples": 44032,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "fr-fr": {
+        "samples": 46080,
+        "sample_rate": 24000,
+        "non_silent": true
+      },
+      "it": {
+        "samples": 45056,
+        "sample_rate": 24000,
+        "non_silent": true
+      }
+    }
+  },
+  "health": {
+    "http_status": 200,
+    "body": {
+      "status": "ready",
+      "service": "yuki",
+      "timestamp": "2026-10-30T14:28:41.412Z"
+    }
+  },
+  "secrets": {
+    "tracked_source_matches": 0,
+    "public_bundle_matches": 0,
+    "standalone_dotenv_files": 0
+  },
+  "limitations": [
+    "Headless Chromium and simulated microphones; physical mobile and Safari checks not certified.",
+    "Smoke-test timing samples do not establish p95 or an uptime guarantee.",
+    "Long-idle cloud sleep/resume and a sustained load soak were not certified.",
+    "Free-tier quotas limit availability; no paid plans or payment methods were added.",
+    "Git history is local; no remote configured."
+  ]
+}

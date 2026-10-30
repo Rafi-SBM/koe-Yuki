@@ -1,7 +1,8 @@
 # Deployment
 
-The code and packaging are prepared locally; this guide does not deploy them.
-Run the checks in README and review docs/REMEDIATION_REPORT.md before release.
+The personal demo is deployed; see [current hosting](../docs/HOSTING.md).
+Run the checks in README before redeploying. The commands below change a deployment
+only when you run them with the appropriate account credentials.
 
 ## Required configuration
 
@@ -73,7 +74,42 @@ for each preview/staging/production deployment. Use a dedicated staging Redis
 namespace/database and LiveKit project to avoid consuming production capacity.
 The localhost diagnostics endpoint is intentionally unavailable in production.
 
+The current project is linked locally under `frontend/.vercel` to the owner's
+`rafi-luffys-projects/yuki-voice-agent` Hobby project. The project uses Node 24.
+Redeploy from `frontend` with `npx vercel deploy --prod --scope rafi-luffys-projects`.
+Keep the exact canonical origin `https://yuki-voice-agent.vercel.app` in production
+`APP_ORIGIN`. Project links, dotenv files and deployment secrets are ignored by Git.
+
+## LiveKit Cloud worker (current deployment)
+
+LiveKit Build hosts the Python worker within its free session allowance, so the
+personal demo needs no additional worker host. Authenticate the LiveKit CLI to the
+existing project, then run `lk agent deploy agent` from the repository root. The
+agent's ID is in `agent/livekit.toml`. The CLI builds `agent/Dockerfile` remotely;
+model weights are downloaded and verified during that build.
+
+Set `LIVEKIT_AGENT_NAME=yuki` on both services. Production admission acquires a
+shared lease before explicitly dispatching that name. This allows LiveKit to start
+an idle deployment without a pre-existing heartbeat. The browser waits for the
+worker's ready and settings acknowledgements before capturing microphone audio.
+Dispatch failures delete the generated room and release its lease. Self-hosted
+workers without a dispatch name still require a warm heartbeat before admission.
+
+Readiness heartbeats start on the server's `worker_started` event independently of
+load calculation: LiveKit Cloud overrides custom load callbacks. Shared admission
+limits bound application concurrency while the SDK handles worker CPU load.
+
+Worker secrets include Groq keys, the shared Redis connection and budget settings.
+LiveKit supplies its own credentials to hosted agents. Keep Groq and optional
+telemetry credentials off Vercel. Remain on Build and Free plans; do not add a
+payment method to work around exhausted quotas.
+
 ## Hugging Face worker
+
+This is an optional alternative, unused by the ₹0 deployment. Creating a Docker
+Space now requires a paid Hugging Face plan; CPU Basic's zero hourly hardware
+price does not remove that requirement. See the current
+[Spaces documentation](https://huggingface.co/docs/hub/spaces-overview).
 
 Run scripts/package-space.sh. The resulting .local/huggingface-space directory is
 a complete Space root containing Dockerfile, README YAML, pinned requirements,

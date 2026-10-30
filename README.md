@@ -5,10 +5,15 @@ and Kokoro speech synthesis on a Python worker. It supports English, Japanese,
 Mandarin Chinese, Hindi, Spanish, French, and Italian speech. Browser voice previews
 use the browser's speech engine; they are not recordings of Kokoro voices.
 
-This project has been hardened locally. Deployment still needs configured shared
-controls and verification on the intended hardware. There is no guaranteed
-sub-second latency, zero cost, or always-on free hosting. See
-[the remediation report](docs/REMEDIATION_REPORT.md) for measured results and limits.
+Personal demo: [yuki-voice-agent.vercel.app](https://yuki-voice-agent.vercel.app).
+Live calls require the owner's access code. The frontend runs on Vercel Hobby,
+the worker on LiveKit Build, shared controls on Upstash Free, and inference on
+Groq Free. See [current hosting and free limits](docs/HOSTING.md).
+
+The deployed personal demo has shared controls and real voice/browser verification.
+Free quotas and automatic worker startup limit availability. See
+[deployment verification](docs/DEPLOYMENT_VERIFICATION.md) for current measurements
+and [the remediation report](docs/REMEDIATION_REPORT.md) for the earlier audit.
 
 ## Local setup
 
@@ -30,6 +35,16 @@ Start the worker and web UI in separate terminals:
 ```sh
 agent/venv/bin/python agent/src/agent.py dev
 npm --prefix frontend run dev
+```
+
+Browser regression checks against a running frontend:
+
+```sh
+python -m pip install playwright
+python -m playwright install chromium
+python scripts/check-browser.py --origin http://localhost:3000
+# With a configured worker and YUKI_TEST_ACCESS_CODE set privately:
+python scripts/check-browser.py --origin https://yuki-voice-agent.vercel.app --live
 ```
 
 Local development can use process-local admission when Redis is absent. Production
