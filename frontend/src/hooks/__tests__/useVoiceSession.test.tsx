@@ -24,6 +24,18 @@ beforeEach(() => {
 });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("microphone lifecycle", () => {
+  it("keeps reply queue notices when an independent speech notice clears", async () => {
+    const { result, unmount } = renderHook(useVoiceSession);
+    await act(() => result.current.connect());
+    const room = mocks.rooms[0] as { handlers: Map<string, (...args: unknown[]) => void> };
+    const notice = (source: string, message: string | null) => room.handlers.get("data")!(new TextEncoder().encode(JSON.stringify({ protocol: "yuki.control.v1", type: "notice", source, message })), { kind: 4 }, undefined, "yuki.control");
+    act(() => { notice("response", "Preparing your reply."); notice("speech", "Preparing speech."); notice("speech", null); });
+    expect(result.current.configNotice).toBe("Preparing your reply.");
+    act(() => notice("response", null));
+    expect(result.current.configNotice).toBeNull();
+    expect(result.current.isConnected).toBe(true);
+    unmount();
+  });
   it("shows a free-limit pause without disconnecting and clears it after recovery", async () => {
     const { result, unmount } = renderHook(useVoiceSession);
     await act(() => result.current.connect());

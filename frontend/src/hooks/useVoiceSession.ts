@@ -11,7 +11,7 @@ export function useVoiceSession() {
   const [isSandboxMode, setIsSandboxMode] = useState(false), [visualizerState, setVisualizerState] = useState<VisualizerState>("IDLE");
   const [isMicMuted, setIsMicMuted] = useState(false), [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]), [configNotice, setConfigNotice] = useState<string | null>(null);
-  const [providerNotice, setProviderNotice] = useState<string | null>(null);
+  const [providerNotices, setProviderNotices] = useState<Record<string, string>>({});
   const [pingMs, setPingMs] = useState<number | null>(null), [turnLatencyMs, setTurnLatencyMs] = useState<number | null>(null);
   const [connectionQuality, setConnectionQuality] = useState<QualityState>("UNKNOWN");
   const [localMicTrack, setLocalMicTrack] = useState<MediaStreamTrack | null>(null), [remoteAgentTrack, setRemoteAgentTrack] = useState<MediaStreamTrack | null>(null);
@@ -46,7 +46,7 @@ export function useVoiceSession() {
   }, [release]);
   const disconnect = useCallback(() => {
     cleanup(); busy.current = false;
-    setProviderNotice(null);
+    setProviderNotices({});
     setAudioBlocked(false); setIsConnected(false); setIsConnecting(false); setIsSandboxMode(false); setVisualizerState("IDLE");
     setLocalMicTrack(null); setRemoteAgentTrack(null); setConnectionQuality("UNKNOWN"); setPingMs(null); setTurnLatencyMs(null);
   }, [cleanup]);
@@ -119,7 +119,10 @@ export function useVoiceSession() {
           if (packet.type === "pong" && typeof packet.id === "string" && Number.isFinite(Number(packet.id))) setPingMs(Math.max(0, Math.round(performance.now() - Number(packet.id))));
           if (packet.type === "telemetry" && Number.isFinite(packet.turn_ms) && packet.turn_ms >= 0) setTurnLatencyMs(packet.turn_ms);
           if (packet.type === "transcript" && ["user", "agent"].includes(packet.sender) && typeof packet.text === "string") { addTranscriptMessage(packet.sender, packet.text); if (packet.sender === "user") setVisualizerState("THINKING"); }
-          if (packet.type === "notice" && (packet.message === null || typeof packet.message === "string")) setProviderNotice(packet.message === null ? null : packet.message.slice(0, 500));
+          if (packet.type === "notice" && (packet.message === null || typeof packet.message === "string")) {
+            const source = ["response", "recognition", "speech"].includes(packet.source) ? packet.source : "provider";
+            setProviderNotices(previous => { const next = { ...previous }; if (packet.message === null) delete next[source]; else next[source] = packet.message.slice(0, 500); return next; });
+          }
           if (packet.type === "error") { disconnect(); setConfigNotice("The voice worker encountered an error. Please start a new call."); }
         } catch { /* Ignore untrusted/malformed data. */ }
       });
@@ -179,5 +182,5 @@ export function useVoiceSession() {
     try { await roomRef.current?.startAudio(); setAudioBlocked(false); setConfigNotice(null); }
     catch { setConfigNotice("Audio could not be enabled. Check this browser's site audio settings."); }
   }, []);
-  return { audioBlocked, resumeAudio, isConnected, isConnecting, isSandboxMode, visualizerState, isMicMuted, isSpeakerMuted, messages, configNotice: configNotice || providerNotice, pingMs, turnLatencyMs, connectionQuality, localMicTrack, remoteAgentTrack, connect, disconnect, toggleConnect: (deviceId?: string, voice?: string, speed?: number, style?: string, accessCode?: string) => isConnected ? disconnect() : void connect(deviceId, voice, speed, style, accessCode), toggleMic, toggleSpeaker, sendSettings, clearMessages: () => setMessages([]), switchActiveDevice, startSandbox, stopSandbox: disconnect };
+  return { audioBlocked, resumeAudio, isConnected, isConnecting, isSandboxMode, visualizerState, isMicMuted, isSpeakerMuted, messages, configNotice: configNotice || providerNotices.response || providerNotices.recognition || providerNotices.speech || providerNotices.provider || null, pingMs, turnLatencyMs, connectionQuality, localMicTrack, remoteAgentTrack, connect, disconnect, toggleConnect: (deviceId?: string, voice?: string, speed?: number, style?: string, accessCode?: string) => isConnected ? disconnect() : void connect(deviceId, voice, speed, style, accessCode), toggleMic, toggleSpeaker, sendSettings, clearMessages: () => setMessages([]), switchActiveDevice, startSandbox, stopSandbox: disconnect };
 }
