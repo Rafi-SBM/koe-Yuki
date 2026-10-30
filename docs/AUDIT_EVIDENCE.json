@@ -1,0 +1,786 @@
+{
+  "audit_date": "2026-10-11",
+  "scope": "local source, production Next.js build, Chromium probes, configured providers, temporary synthetic LiveKit rooms; not a production deployment certification",
+  "npm": {
+    "summary": {
+      "info": 0,
+      "low": 0,
+      "moderate": 2,
+      "high": 11,
+      "critical": 1,
+      "total": 14
+    },
+    "packages": [
+      {
+        "name": "@next/eslint-plugin-next",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "eslint-config-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      },
+      {
+        "name": "brace-expansion",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": true,
+        "advisories": [
+          {
+            "title": "brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+            "affectedRange": "<1.1.21"
+          },
+          {
+            "title": "brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+            "affectedRange": ">=4.0.0 <5.0.12"
+          },
+          {
+            "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+            "affectedRange": "<1.1.20"
+          },
+          {
+            "title": "brace-expansion: DoS via uncontrolled recursion on nested brace groups causing stack exhaustion",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+            "affectedRange": ">=4.0.0 <5.0.11"
+          },
+          {
+            "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+            "affectedRange": "<1.1.19"
+          },
+          {
+            "title": "brace-expansion: DoS via uncontrolled recursion in parseCommaParts causing stack exhaustion",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+            "affectedRange": ">=4.0.0 <5.0.10"
+          }
+        ]
+      },
+      {
+        "name": "braces",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        },
+        "advisories": [
+          {
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "affectedRange": "<=3.0.3"
+          }
+        ]
+      },
+      {
+        "name": "chokidar",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      },
+      {
+        "name": "eslint-config-next",
+        "severity": "high",
+        "direct": true,
+        "suggestedFix": {
+          "name": "eslint-config-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      },
+      {
+        "name": "fast-glob",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "eslint-config-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      },
+      {
+        "name": "micromatch",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      },
+      {
+        "name": "next",
+        "severity": "critical",
+        "direct": true,
+        "suggestedFix": {
+          "name": "next",
+          "version": "15.5.27",
+          "isSemVerMajor": false
+        },
+        "advisories": [
+          {
+            "title": "Information exposure in Next.js dev server due to lack of origin verification",
+            "severity": "low",
+            "url": "https://github.com/advisories/GHSA-3h52-269p-cp9r",
+            "affectedRange": ">=15.0.0 <15.2.2"
+          },
+          {
+            "title": "Next.js Affected by Cache Key Confusion for Image Optimization API Routes",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-g5qg-72qw-gw5v",
+            "affectedRange": ">=15.0.0 <=15.4.4"
+          },
+          {
+            "title": "Next.js Content Injection Vulnerability for Image Optimization",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-xv57-4mr9-wg8v",
+            "affectedRange": ">=15.0.0 <=15.4.4"
+          },
+          {
+            "title": "Next.js Improper Middleware Redirect Handling Leads to SSRF",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-4342-x723-ch2f",
+            "affectedRange": ">=15.0.0-canary.0 <15.4.7"
+          },
+          {
+            "title": "Next.js is vulnerable to RCE in React flight protocol",
+            "severity": "critical",
+            "url": "https://github.com/advisories/GHSA-9qr9-h5gf-34mp",
+            "affectedRange": ">=15.2.0-canary.0 <15.2.6"
+          },
+          {
+            "title": "Next Server Actions Source Code Exposure ",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-w37m-7fhw-fmv9",
+            "affectedRange": ">=15.2.0-canary.0 <15.2.7"
+          },
+          {
+            "title": "Next Vulnerable to Denial of Service with Server Components",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-mwv6-3258-q52c",
+            "affectedRange": ">=15.2.0-canary.0 <15.2.7"
+          },
+          {
+            "title": "Next.js self-hosted applications vulnerable to DoS via Image Optimizer remotePatterns configuration",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-9g9p-9gw9-jx7f",
+            "affectedRange": ">=10.0.0 <15.5.10"
+          },
+          {
+            "title": "Next.js HTTP request deserialization can lead to DoS when using insecure React Server Components",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-h25m-26qc-wcjf",
+            "affectedRange": ">=15.2.0-canary.0 <15.2.9"
+          },
+          {
+            "title": "Authorization Bypass in Next.js Middleware",
+            "severity": "critical",
+            "url": "https://github.com/advisories/GHSA-f82v-jwr5-mffw",
+            "affectedRange": ">=15.0.0 <15.2.3"
+          },
+          {
+            "title": "Next.js: HTTP request smuggling in rewrites",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-ggv3-7p47-pfv8",
+            "affectedRange": ">=9.5.0 <15.5.13"
+          },
+          {
+            "title": "Next.js: Unbounded next/image disk cache growth can exhaust storage",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-3x4c-7xq6-9pq8",
+            "affectedRange": ">=10.0.0 <15.5.14"
+          },
+          {
+            "title": "Next.js has a Denial of Service with Server Components",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-q4gf-8mx6-v5v3",
+            "affectedRange": ">=13.0.0 <15.5.15"
+          },
+          {
+            "title": "Next.js Vulnerable to Denial of Service with Server Components",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-8h8q-6873-q5fj",
+            "affectedRange": ">=13.0.0 <15.5.16"
+          },
+          {
+            "title": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes - Incomplete Fix Follow-Up",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-26hh-7cqf-hhc6",
+            "affectedRange": ">=15.2.0 <15.5.18"
+          },
+          {
+            "title": "Next.js's Middleware / Proxy redirects can be cache-poisoned",
+            "severity": "low",
+            "url": "https://github.com/advisories/GHSA-3g8h-86w9-wvmq",
+            "affectedRange": ">=12.2.0 <15.5.16"
+          },
+          {
+            "title": "Next.js vulnerable to cross-site scripting in App Router applications using CSP nonces",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-ffhc-5mcf-pf4q",
+            "affectedRange": ">=13.4.0 <15.5.16"
+          },
+          {
+            "title": "Next.js vulnerable to cache poisoning via collisions in React Server Component cache-busting",
+            "severity": "low",
+            "url": "https://github.com/advisories/GHSA-vfv6-92ff-j949",
+            "affectedRange": ">=13.4.6 <15.5.16"
+          },
+          {
+            "title": "Next.js has cross-site scripting in beforeInteractive scripts with untrusted input",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-gx5p-jg67-6x7h",
+            "affectedRange": ">=13.0.0 <15.5.16"
+          },
+          {
+            "title": "Next.js vulnerable to Denial of Service via connection exhaustion in applications using Cache Components",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-mg66-mrh9-m8jx",
+            "affectedRange": ">=15.0.0 <15.5.16"
+          },
+          {
+            "title": "Next.js has a Denial of Service in the Image Optimization API",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-h64f-5h5j-jqjh",
+            "affectedRange": ">=10.0.0 <15.5.16"
+          },
+          {
+            "title": "Next.js vulnerable to server-side request forgery in applications using WebSocket upgrades",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-c4j6-fc7j-m34r",
+            "affectedRange": ">=13.4.13 <15.5.16"
+          },
+          {
+            "title": "Next.js vulnerable to cache poisoning in React Server Component responses",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-wfc6-r584-vfw7",
+            "affectedRange": ">=14.2.0 <15.5.16"
+          },
+          {
+            "title": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-267c-6grr-h53f",
+            "affectedRange": ">=15.2.0 <15.5.16"
+          },
+          {
+            "title": "Next.js has a Middleware / Proxy bypass in Pages Router applications using i18n",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-36qx-fr4f-26g5",
+            "affectedRange": ">=12.2.0 <15.5.16"
+          },
+          {
+            "title": "Next.js: Denial of Service in App Router using Server Actions",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-m99w-x7hq-7vfj",
+            "affectedRange": ">=13.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Server-Side Request Forgery in Server Actions on custom servers",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-89xv-2m56-2m9x",
+            "affectedRange": ">=14.1.1 <15.5.21"
+          },
+          {
+            "title": "Next.js: Cache confusion of response bodies for requests with bodies",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-68g3-v927-f742",
+            "affectedRange": ">=13.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-4633-3j49-mh5q",
+            "affectedRange": ">=13.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Unbounded Server Action payload in Edge runtime",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-4c39-4ccg-62r3",
+            "affectedRange": ">=13.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-p9j2-gv94-2wf4",
+            "affectedRange": ">=12.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Unauthenticated disclosure of internal Server Function endpoints",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-955p-x3mx-jcvp",
+            "affectedRange": ">=13.0.0 <15.5.21"
+          },
+          {
+            "title": "Next.js: Unauthenticated Remote Code Execution on windows-hosted servers",
+            "severity": "critical",
+            "url": "https://github.com/advisories/GHSA-p293-qw3h-jr36",
+            "affectedRange": ">=13.4.0 <15.5.24"
+          },
+          {
+            "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+            "severity": "critical",
+            "url": "https://github.com/advisories/GHSA-2xp9-vwfh-vxw4",
+            "affectedRange": ">=10.0.0 <15.5.24"
+          },
+          {
+            "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-4jqv-mc3x-m676",
+            "affectedRange": ">=15.0.0 <15.5.27"
+          },
+          {
+            "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p",
+            "affectedRange": ">=15.0.0 <15.5.27"
+          }
+        ]
+      },
+      {
+        "name": "postcss",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "next",
+          "version": "15.5.27",
+          "isSemVerMajor": false
+        },
+        "advisories": [
+          {
+            "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+            "affectedRange": "<8.5.10"
+          },
+          {
+            "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+            "affectedRange": "<=8.5.11"
+          },
+          {
+            "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q \u2014 attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+            "affectedRange": "<=8.5.22"
+          },
+          {
+            "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+            "affectedRange": "<=8.5.17"
+          }
+        ]
+      },
+      {
+        "name": "postcss-nested",
+        "severity": "moderate",
+        "direct": false,
+        "suggestedFix": true,
+        "advisories": []
+      },
+      {
+        "name": "postcss-selector-parser",
+        "severity": "moderate",
+        "direct": false,
+        "suggestedFix": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        },
+        "advisories": [
+          {
+            "title": "PostCSS: Quadratic complexity in flat selector parsing allows CPU exhaustion",
+            "severity": "moderate",
+            "url": "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+            "affectedRange": "<7.1.6"
+          }
+        ]
+      },
+      {
+        "name": "sharp",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": {
+          "name": "next",
+          "version": "15.5.27",
+          "isSemVerMajor": false
+        },
+        "advisories": [
+          {
+            "title": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+            "affectedRange": "<0.35.0"
+          },
+          {
+            "title": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+            "affectedRange": "<0.35.4"
+          },
+          {
+            "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w",
+            "affectedRange": "<0.35.5"
+          }
+        ]
+      },
+      {
+        "name": "source-map-js",
+        "severity": "high",
+        "direct": false,
+        "suggestedFix": true,
+        "advisories": [
+          {
+            "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+            "severity": "high",
+            "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+            "affectedRange": ">=1.0.0 <1.2.2"
+          }
+        ]
+      },
+      {
+        "name": "tailwindcss",
+        "severity": "high",
+        "direct": true,
+        "suggestedFix": {
+          "name": "tailwindcss",
+          "version": "4.3.3",
+          "isSemVerMajor": true
+        },
+        "advisories": []
+      }
+    ]
+  },
+  "python": {
+    "findingCount": 18,
+    "packages": [
+      {
+        "name": "multidict",
+        "version": "6.7.1",
+        "advisories": [
+          {
+            "id": "CVE-2026-104874",
+            "aliases": [
+              "GHSA-54p9-h82j-f925"
+            ],
+            "fixVersions": [
+              "6.9.1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.13.0",
+        "advisories": [
+          {
+            "id": "PYSEC-2026-4145",
+            "aliases": [
+              "GHSA-ffc3-869f-jxw9",
+              "CVE-2026-102268"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4146",
+            "aliases": [
+              "CVE-2026-103001",
+              "GHSA-gvp8-978c-rx2q"
+            ],
+            "fixVersions": []
+          },
+          {
+            "id": "PYSEC-2026-4149",
+            "aliases": [
+              "CVE-2026-102271",
+              "GHSA-p4g4-x82p-q773"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4152",
+            "aliases": [
+              "CVE-2026-102274",
+              "GHSA-w6j9-cwv2-h6wq"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4144",
+            "aliases": [
+              "CVE-2026-102267",
+              "GHSA-9v7f-9g4p-ffgj"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4143",
+            "aliases": [
+              "CVE-2026-102266",
+              "GHSA-9j54-fg26-wv3r"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4148",
+            "aliases": [
+              "GHSA-jwrc-g2q2-pq5p",
+              "CVE-2026-102270"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4140",
+            "aliases": [
+              "CVE-2026-101917",
+              "GHSA-2gx3-rcp4-g85q"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4141",
+            "aliases": [
+              "GHSA-42vr-xj54-vc7v",
+              "CVE-2026-101918"
+            ],
+            "fixVersions": [
+              "2.15.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4147",
+            "aliases": [
+              "GHSA-hxm8-2xgr-2p9m",
+              "CVE-2026-102269"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4151",
+            "aliases": [
+              "GHSA-w2cx-738m-mc7w",
+              "CVE-2026-102273"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4150",
+            "aliases": [
+              "CVE-2026-102272",
+              "GHSA-r6x4-923q-g947"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4142",
+            "aliases": [
+              "CVE-2026-102265",
+              "GHSA-8wjv-2p76-3863"
+            ],
+            "fixVersions": [
+              "2.14.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4183",
+            "aliases": [
+              "CVE-2026-102275",
+              "GHSA-x33g-cr3x-6449"
+            ],
+            "fixVersions": [
+              "2.15.0"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "urllib3",
+        "version": "2.7.0",
+        "advisories": [
+          {
+            "id": "PYSEC-2026-4177",
+            "aliases": [
+              "CVE-2026-97689",
+              "GHSA-vxq7-64xx-v4gw"
+            ],
+            "fixVersions": [
+              "2.8.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4176",
+            "aliases": [
+              "CVE-2026-97688",
+              "GHSA-gh4c-6fx4-qh6g"
+            ],
+            "fixVersions": [
+              "2.8.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-4175",
+            "aliases": [
+              "GHSA-8988-9cw3-xx77",
+              "CVE-2026-97687"
+            ],
+            "fixVersions": [
+              "2.8.0"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "existing_four_room_gate": {
+    "users": 4,
+    "passed": 3,
+    "p50_ms": 11115,
+    "p95_ms": 11115,
+    "results": [
+      {
+        "user": 0,
+        "ok": true,
+        "frames": 240,
+        "transcript": "Hey, I'm Yuki. What can I help with?",
+        "elapsed_ms": 9081
+      },
+      {
+        "user": 1,
+        "ok": false,
+        "frames": 293,
+        "transcript": "",
+        "elapsed_ms": 29298
+      },
+      {
+        "user": 2,
+        "ok": true,
+        "frames": 450,
+        "transcript": "Hey, I'm Yuki. What can I help with?",
+        "elapsed_ms": 25309
+      },
+      {
+        "user": 3,
+        "ok": true,
+        "frames": 344,
+        "transcript": "Tokyo.",
+        "elapsed_ms": 11115
+      }
+    ]
+  },
+  "temporary_stricter_two_room_probe": {
+    "users": 2,
+    "passed": 1,
+    "p50_ms": 18348,
+    "p95_ms": 18348,
+    "results": [
+      {
+        "user": 0,
+        "ok": false,
+        "frames": 2226,
+        "transcript": "",
+        "elapsed_ms": 32850
+      },
+      {
+        "user": 1,
+        "ok": true,
+        "frames": 459,
+        "transcript": "Tokyo.",
+        "elapsed_ms": 18348
+      }
+    ]
+  },
+  "subsystem_measurements": {
+    "englishColdTtsMs": 4652.8,
+    "audioSeconds": 3.2,
+    "llmTotalResponseMs": 1286.6,
+    "whisperMs": 528.4
+  },
+  "multilingual_synthesis": {
+    "en-us": "generated",
+    "ja": "generated",
+    "zh": "language \"zh\" is not supported by the espeak backend",
+    "hi": "generated",
+    "es": "generated",
+    "fr-fr": "generated",
+    "it": "generated",
+    "limitation": "audio generation is not a pronunciation quality assessment"
+  },
+  "browser_reproductions": {
+    "sandboxReconnect": {
+      "uiMuted": true,
+      "newTrackEnabled": true
+    },
+    "connectionFailure": {
+      "displayedError": "Not supported",
+      "peerConnectionState": "connected"
+    },
+    "harness429": "application error boundary rendered",
+    "preferencesEscape": "dialog remained open",
+    "mobileViewport": {
+      "width": 390,
+      "documentWidth": 390
+    }
+  },
+  "releaseGateFaultInjection": {
+    "llmStatus": "failed",
+    "ttsStatus": "skipped",
+    "evalHarnessExitCode": 0
+  },
+  "runtime": {
+    "node": "26.0.0",
+    "python": "3.11.15",
+    "livekitAgents": "1.7.0",
+    "kokoroOnnx": "0.6.1",
+    "langfuse": "4.15.1"
+  },
+  "limitations": [
+    "Docker daemon unavailable; image builds not run",
+    "No deployed production URL supplied",
+    "No Git history in this folder",
+    "Langfuse ingestion not tested; synthetic audit worker tracing disabled",
+    "Safari/iOS/Android, soak and fault-recovery tests remain release work"
+  ]
+}
