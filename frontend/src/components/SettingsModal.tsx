@@ -11,6 +11,8 @@ import {
   Square,
 } from "lucide-react";
 import { PRESET_THEMES, ColorTheme } from "./ThemeSelector";
+import voiceCategories from "@/data/voice-catalog.json";
+import previewManifest from "@/data/voice-previews.json";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -48,121 +50,55 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [activeTab, setActiveTab] = useState<"general" | "voice" | "appearance" | "shortcuts">("general");
   const dialogRef = useDialogFocus(isOpen, onClose);
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const previewAudio = React.useRef<HTMLAudioElement | null>(null);
 
   const stopPreview = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+    const audio = previewAudio.current;
+    previewAudio.current = null;
+    if (audio) {
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
     }
     setPreviewingVoice(null);
   };
 
-  const previewVoice = (voiceId: string, language: string) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  const previewVoice = async (voiceId: string) => {
     if (previewingVoice === voiceId) {
       stopPreview();
       return;
     }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(
-      language === "Japanese" ? "こんにちは、私はユキです。" :
-      language === "Spanish" ? "Hola, soy Yuki. Encantada de conocerte." :
-      language === "French" ? "Bonjour, je suis Yuki. Ravie de vous rencontrer." :
-      language === "Hindi" ? "नमस्ते, मैं युकी हूँ।" :
-      language === "Chinese" ? "你好，我是由纪。很高兴认识你。" :
-      language === "Italian" ? "Ciao, sono Yuki. Piacere di conoscerti." :
-      "Hello, I’m Yuki. Let’s make something wonderful together."
-    );
-    utterance.rate = speechSpeed;
-    utterance.pitch = 1;
-    const languageCode = {
-      Japanese: "ja-JP", Spanish: "es-ES", French: "fr-FR", Hindi: "hi-IN",
-      Chinese: "zh-CN", Italian: "it-IT", English: "en-US", Multilingual: "en-US",
-    }[language] || "en-US";
-    utterance.lang = languageCode;
-    const browserVoice = window.speechSynthesis.getVoices().find((candidate) =>
-      candidate.lang.toLowerCase().startsWith(languageCode.slice(0, 2).toLowerCase())
-    );
-    if (browserVoice) utterance.voice = browserVoice;
-    utterance.onend = () => setPreviewingVoice(null);
-    utterance.onerror = () => setPreviewingVoice(null);
+    stopPreview();
+    setPreviewError(null);
+    const preview = (previewManifest as Record<string, { src: string }>)[voiceId];
+    if (!preview) { setPreviewError("This voice preview is unavailable."); return; }
+    const audio = new Audio(preview.src);
+    audio.playbackRate = speechSpeed;
+    audio.preservesPitch = true;
+    previewAudio.current = audio;
+    audio.onended = () => { if (previewAudio.current === audio) stopPreview(); };
+    const failed = () => {
+      if (previewAudio.current !== audio) return;
+      stopPreview();
+      setPreviewError("The preview could not play. Tap Preview to try again.");
+    };
+    audio.onerror = failed;
     setPreviewingVoice(voiceId);
-    window.speechSynthesis.speak(utterance);
+    try { await audio.play(); } catch { failed(); }
   };
 
   React.useEffect(() => () => stopPreview(), []);
   React.useEffect(() => {
-    if (!isOpen) stopPreview();
-  }, [isOpen]);
+    if (!isOpen || activeTab !== "voice") stopPreview();
+  }, [isOpen, activeTab]);
+  React.useEffect(() => {
+    if (previewAudio.current) previewAudio.current.playbackRate = speechSpeed;
+  }, [speechSpeed]);
 
   if (!isOpen) return null;
-
-  const voiceCategories = [
-    {
-      category: "Auto-Detection (Recommended)",
-      voices: [
-        {
-          id: "auto",
-          name: "Smart Auto-Switch",
-          lang: "Multilingual",
-          accent: "Auto-detects language",
-          style: "Switches to native voice (Japanese, Spanish, French, Hindi, English, etc.)",
-          gender: "Adaptive",
-        },
-      ],
-    },
-    {
-      category: "Japanese (日本語)",
-      voices: [
-        { id: "jf_alpha", name: "Alpha", lang: "Japanese", accent: "Tokyo", style: "Natural & Clear", gender: "Female" },
-        { id: "jf_gongitsune", name: "Gongitsune", lang: "Japanese", accent: "Standard", style: "Gentle & Expressive", gender: "Female" },
-        { id: "jm_kumo", name: "Kumo", lang: "Japanese", accent: "Standard", style: "Calm & Grounded", gender: "Male" },
-      ],
-    },
-    {
-      category: "English (US / UK)",
-      voices: [
-        { id: "af_bella", name: "Bella", lang: "English", accent: "American", style: "Warm & Conversational", gender: "Female" },
-        { id: "af_sarah", name: "Sarah", lang: "English", accent: "American", style: "Crisp & Professional", gender: "Female" },
-        { id: "am_adam", name: "Adam", lang: "English", accent: "American", style: "Deep & Grounded", gender: "Male" },
-        { id: "am_michael", name: "Michael", lang: "English", accent: "American", style: "Energetic & Direct", gender: "Male" },
-        { id: "bf_emma", name: "Emma", lang: "English", accent: "British", style: "Refined & Articulate", gender: "Female" },
-        { id: "bm_george", name: "George", lang: "English", accent: "British", style: "Authoritative & Warm", gender: "Male" },
-      ],
-    },
-    {
-      category: "Spanish (Español)",
-      voices: [
-        { id: "ef_dora", name: "Dora", lang: "Spanish", accent: "Castilian / Latin", style: "Warm & Fluent", gender: "Female" },
-        { id: "em_alex", name: "Alex", lang: "Spanish", accent: "Castilian / Latin", style: "Clear & Modern", gender: "Male" },
-      ],
-    },
-    {
-      category: "French (Français)",
-      voices: [
-        { id: "ff_siwis", name: "Siwis", lang: "French", accent: "Standard", style: "Elegant & Melodic", gender: "Female" },
-      ],
-    },
-    {
-      category: "Hindi (हिन्दी)",
-      voices: [
-        { id: "hf_alpha", name: "Alpha", lang: "Hindi", accent: "Standard", style: "Warm & Articulate", gender: "Female" },
-        { id: "hm_omega", name: "Omega", lang: "Hindi", accent: "Standard", style: "Deep & Calm", gender: "Male" },
-      ],
-    },
-    {
-      category: "Chinese (中文)",
-      voices: [
-        { id: "zf_xiaobei", name: "Xiaobei", lang: "Chinese", accent: "Mandarin", style: "Crisp & Natural", gender: "Female" },
-        { id: "zm_yunjian", name: "Yunjian", lang: "Chinese", accent: "Mandarin", style: "Smooth & Polite", gender: "Male" },
-      ],
-    },
-    {
-      category: "Italian (Italiano)",
-      voices: [
-        { id: "if_sara", name: "Sara", lang: "Italian", accent: "Standard", style: "Lively & Clear", gender: "Female" },
-      ],
-    },
-  ];
 
   const shortcuts = [
     { key: "Space", action: "Toggle Microphone Mute / Unmute" },
@@ -311,6 +247,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB: VOICE & LANGUAGE */}
           {activeTab === "voice" && (
             <div className="space-y-5 text-xs">
+              <p className="text-[11px] leading-relaxed text-zinc-400">Previews use the actual voices from live calls. Auto-switch plays an English example.</p>
+              {previewError && <p role="alert" className="text-amber-200">{previewError}</p>}
               <div className="space-y-4">
                 {voiceCategories.map((group) => (
                   <div key={group.category}>
@@ -340,9 +278,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             </button>
                             <button
                               type="button"
-                              onClick={() => previewVoice(voice.id, voice.lang)}
+                              onClick={() => void previewVoice(voice.id)}
                               className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/80 bg-zinc-950/50 px-2 py-1 text-[10px] font-medium text-zinc-300 transition-colors hover:border-sky-400/50 hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400/50"
-                              aria-label={`${previewingVoice === voice.id ? "Stop" : "Preview"} ${voice.name} voice`}
+                              aria-label={`${previewingVoice === voice.id ? "Stop" : "Preview"} ${voice.name} ${voice.lang} voice`}
                             >
                               {previewingVoice === voice.id ? <Square className="h-3 w-3 fill-current" /> : <Play className="h-3 w-3 fill-current" />}
                               {previewingVoice === voice.id ? "Stop preview" : "Preview"}
@@ -357,7 +295,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               <div className="pt-2 border-t border-zinc-800/80">
                 <p className="mb-3 text-[10px] leading-relaxed text-zinc-500">
-                  Preview uses your browser&apos;s local speech engine. The live call uses the selected Kokoro voice on the worker.
+                  Samples use the same Kokoro model and voice as live calls. Playback follows your speech-speed setting.
                 </p>
                 <div className="flex items-center justify-between mb-2">
                   <label htmlFor="preferences-speed" className="text-zinc-300 font-medium">Speech Speed</label>

@@ -1,0 +1,110 @@
+{
+  "auto": {
+    "src": "/voice-previews/auto-e973bdee1828.wav",
+    "pcmSha256": "e973bdee182817ddd08f869f027351a5606598fc51e22f677ed23d5edf1ba938",
+    "seconds": 3.328,
+    "text": "Hello, I'm Yuki. I can switch languages as we talk."
+  },
+  "jf_alpha": {
+    "src": "/voice-previews/jf_alpha-e052727232af.wav",
+    "pcmSha256": "e052727232af4a8d38b1424e7a55a097d7611308c26b8f72e180975085e8a519",
+    "seconds": 4.053,
+    "text": "こんにちは、私はユキです。今日は何をお手伝いしましょうか。"
+  },
+  "jf_gongitsune": {
+    "src": "/voice-previews/jf_gongitsune-e5b689950749.wav",
+    "pcmSha256": "e5b689950749d8fbda313c42817ed23e04e2dc12d5ea5f275a43e148bb1beab8",
+    "seconds": 5.419,
+    "text": "こんにちは、私はユキです。今日は何をお手伝いしましょうか。"
+  },
+  "jm_kumo": {
+    "src": "/voice-previews/jm_kumo-005bf5b8a331.wav",
+    "pcmSha256": "005bf5b8a331c14d1887a398abe1f7e284d6cf3da7bbce69f5c81995c2f8633a",
+    "seconds": 3.776,
+    "text": "こんにちは、私はユキです。今日は何をお手伝いしましょうか。"
+  },
+  "af_bella": {
+    "src": "/voice-previews/af_bella-aec664d031d1.wav",
+    "pcmSha256": "aec664d031d1a60437add88b092aac0645e8f13aa6723f0fc00a4ac5e02def3e",
+    "seconds": 2.581,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "af_sarah": {
+    "src": "/voice-previews/af_sarah-99fff67068d4.wav",
+    "pcmSha256": "99fff67068d49621aa8ba28f604934925711fd15b79c2a1302606bf9baf57e1a",
+    "seconds": 2.56,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "am_adam": {
+    "src": "/voice-previews/am_adam-2234595cd6a6.wav",
+    "pcmSha256": "2234595cd6a62e8facae9b5026b59e6b4ae4c3a2daa9585c4fc4d826fba540c8",
+    "seconds": 2.56,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "am_michael": {
+    "src": "/voice-previews/am_michael-2615178d9290.wav",
+    "pcmSha256": "2615178d9290c2819016155c694374bd90d5dffeebbc1adca2cdb6daf7de6a19",
+    "seconds": 3.115,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "bf_emma": {
+    "src": "/voice-previews/bf_emma-7ac35268a88b.wav",
+    "pcmSha256": "7ac35268a88b66f0def8d924e58a6b4a066282e5e1016ff73ce733e371f80b14",
+    "seconds": 2.944,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "bm_george": {
+    "src": "/voice-previews/bm_george-459ab679791d.wav",
+    "pcmSha256": "459ab679791dec8c0cfec38af74ee94c88169b05dd4ac36cda53a7992cd4b3c4",
+    "seconds": 3.264,
+    "text": "Hello, I'm Yuki. How can I help you today?"
+  },
+  "ef_dora": {
+    "src": "/voice-previews/ef_dora-57984d552cc4.wav",
+    "pcmSha256": "57984d552cc4eefabab2518a085e1c215d12761e8b62627a89fa8c85f09922ad",
+    "seconds": 2.752,
+    "text": "Hola, soy Yuki. ¿Cómo puedo ayudarte hoy?"
+  },
+  "em_alex": {
+    "src": "/voice-previews/em_alex-03b873c3c5fd.wav",
+    "pcmSha256": "03b873c3c5fd8325a7ce9d6a1561eb144c657f7e5c29a1264051ebade1edce2a",
+    "seconds": 2.88,
+    "text": "Hola, soy Yuki. ¿Cómo puedo ayudarte hoy?"
+  },
+  "ff_siwis": {
+    "src": "/voice-previews/ff_siwis-9559b4494782.wav",
+    "pcmSha256": "9559b44947827333e638c13c74b94c1d08ccad05309966b3304b5b66ccf88b4d",
+    "seconds": 2.731,
+    "text": "Bonjour, je suis Yuki. Comment puis-je vous aider ?"
+  },
+  "hf_alpha": {
+    "src": "/voice-previews/hf_alpha-c3738ed64dfc.wav",
+    "pcmSha256": "c3738ed64dfc663aea687b4d3b72e7fccdbfb28fc8d21a67cabaa09fe3aeeca4",
+    "seconds": 4.075,
+    "text": "नमस्ते, मैं युकी हूँ। मैं आपकी मदद कैसे कर सकती हूँ?"
+  },
+  "hm_omega": {
+    "src": "/voice-previews/hm_omega-67f39992b353.wav",
+    "pcmSha256": "67f39992b3530802e241b6a0ca9e8f4607f12157a1006f0796900f5308e64965",
+    "seconds": 4.096,
+    "text": "नमस्ते, मैं युकी हूँ। मैं आपकी मदद कैसे कर सकती हूँ?"
+  },
+  "zf_xiaobei": {
+    "src": "/voice-previews/zf_xiaobei-11c92db8a757.wav",
+    "pcmSha256": "11c92db8a757db6286f7b63e79eabcb44ed99b07a192f69b0f13c2ba08d90106",
+    "seconds": 4.907,
+    "text": "你好，我是由纪。今天有什么可以帮助你的吗？"
+  },
+  "zm_yunjian": {
+    "src": "/voice-previews/zm_yunjian-78a15350dd18.wav",
+    "pcmSha256": "78a15350dd18e56ace725721185912f9da8ba5af07b1c208a431f8f993d020c7",
+    "seconds": 4.203,
+    "text": "你好，我是由纪。今天有什么可以帮助你的吗？"
+  },
+  "if_sara": {
+    "src": "/voice-previews/if_sara-521bd014f379.wav",
+    "pcmSha256": "521bd014f3796f008e47f1b559a390810b9a5d5393b4ebb27d7d4fc5e88a603b",
+    "seconds": 3.221,
+    "text": "Ciao, sono Yuki. Come posso aiutarti oggi?"
+  }
+}

@@ -1,0 +1,186 @@
+[
+  {
+    "category": "Auto-Detection (Recommended)",
+    "voices": [
+      {
+        "id": "auto",
+        "name": "Smart Auto-Switch",
+        "lang": "Multilingual",
+        "accent": "Auto-detects language",
+        "style": "Switches to native voice (Japanese, Spanish, French, Hindi, English, etc.)",
+        "gender": "Adaptive"
+      }
+    ]
+  },
+  {
+    "category": "Japanese (日本語)",
+    "voices": [
+      {
+        "id": "jf_alpha",
+        "name": "Alpha",
+        "lang": "Japanese",
+        "accent": "Tokyo",
+        "style": "Natural & Clear",
+        "gender": "Female"
+      },
+      {
+        "id": "jf_gongitsune",
+        "name": "Gongitsune",
+        "lang": "Japanese",
+        "accent": "Standard",
+        "style": "Gentle & Expressive",
+        "gender": "Female"
+      },
+      {
+        "id": "jm_kumo",
+        "name": "Kumo",
+        "lang": "Japanese",
+        "accent": "Standard",
+        "style": "Calm & Grounded",
+        "gender": "Male"
+      }
+    ]
+  },
+  {
+    "category": "English (US / UK)",
+    "voices": [
+      {
+        "id": "af_bella",
+        "name": "Bella",
+        "lang": "English",
+        "accent": "American",
+        "style": "Warm & Conversational",
+        "gender": "Female"
+      },
+      {
+        "id": "af_sarah",
+        "name": "Sarah",
+        "lang": "English",
+        "accent": "American",
+        "style": "Crisp & Professional",
+        "gender": "Female"
+      },
+      {
+        "id": "am_adam",
+        "name": "Adam",
+        "lang": "English",
+        "accent": "American",
+        "style": "Deep & Grounded",
+        "gender": "Male"
+      },
+      {
+        "id": "am_michael",
+        "name": "Michael",
+        "lang": "English",
+        "accent": "American",
+        "style": "Energetic & Direct",
+        "gender": "Male"
+      },
+      {
+        "id": "bf_emma",
+        "name": "Emma",
+        "lang": "English",
+        "accent": "British",
+        "style": "Refined & Articulate",
+        "gender": "Female"
+      },
+      {
+        "id": "bm_george",
+        "name": "George",
+        "lang": "English",
+        "accent": "British",
+        "style": "Authoritative & Warm",
+        "gender": "Male"
+      }
+    ]
+  },
+  {
+    "category": "Spanish (Español)",
+    "voices": [
+      {
+        "id": "ef_dora",
+        "name": "Dora",
+        "lang": "Spanish",
+        "accent": "Castilian / Latin",
+        "style": "Warm & Fluent",
+        "gender": "Female"
+      },
+      {
+        "id": "em_alex",
+        "name": "Alex",
+        "lang": "Spanish",
+        "accent": "Castilian / Latin",
+        "style": "Clear & Modern",
+        "gender": "Male"
+      }
+    ]
+  },
+  {
+    "category": "French (Français)",
+    "voices": [
+      {
+        "id": "ff_siwis",
+        "name": "Siwis",
+        "lang": "French",
+        "accent": "Standard",
+        "style": "Elegant & Melodic",
+        "gender": "Female"
+      }
+    ]
+  },
+  {
+    "category": "Hindi (हिन्दी)",
+    "voices": [
+      {
+        "id": "hf_alpha",
+        "name": "Alpha",
+        "lang": "Hindi",
+        "accent": "Standard",
+        "style": "Warm & Articulate",
+        "gender": "Female"
+      },
+      {
+        "id": "hm_omega",
+        "name": "Omega",
+        "lang": "Hindi",
+        "accent": "Standard",
+        "style": "Deep & Calm",
+        "gender": "Male"
+      }
+    ]
+  },
+  {
+    "category": "Chinese (中文)",
+    "voices": [
+      {
+        "id": "zf_xiaobei",
+        "name": "Xiaobei",
+        "lang": "Chinese",
+        "accent": "Mandarin",
+        "style": "Crisp & Natural",
+        "gender": "Female"
+      },
+      {
+        "id": "zm_yunjian",
+        "name": "Yunjian",
+        "lang": "Chinese",
+        "accent": "Mandarin",
+        "style": "Smooth & Polite",
+        "gender": "Male"
+      }
+    ]
+  },
+  {
+    "category": "Italian (Italiano)",
+    "voices": [
+      {
+        "id": "if_sara",
+        "name": "Sara",
+        "lang": "Italian",
+        "accent": "Standard",
+        "style": "Lively & Clear",
+        "gender": "Female"
+      }
+    ]
+  }
+]
