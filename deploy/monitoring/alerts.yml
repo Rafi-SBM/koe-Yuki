@@ -1,0 +1,18 @@
+groups:
+  - name: yuki
+    rules:
+      - alert: YukiVoiceLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(yuki_turn_latency_seconds_bucket[10m]))) > 5
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: 'Yuki voice latency exceeds five seconds' }
+      - alert: YukiPipelineErrors
+        expr: sum(increase(yuki_session_errors_total[5m])) > 2
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: 'Yuki pipeline failures require operator attention' }
+      - alert: YukiWorkerUnavailable
+        expr: up{job="yuki-worker"} == 0
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: 'Yuki worker metrics endpoint is unavailable' }
