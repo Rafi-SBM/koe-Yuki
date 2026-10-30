@@ -11,7 +11,7 @@ Redis REST endpoint) for this environment. Both services need its URL and write
 token. Admission, model quotas, daily budgets, credential cooldowns, and worker
 heartbeats use atomic Lua operations in the same Redis hash slot. A read-only token
 will not work. Store/heartbeat failures fail admission closed. A lost worker stops
-being ready after its 20-second heartbeat TTL.
+being ready after its 45-second heartbeat TTL. Heartbeats renew every 15 seconds.
 
 The frontend requires:
 
@@ -31,6 +31,20 @@ upper bound. Quota controls apply to this application; account billing controls
 are still required. Completed metered responses refund unused token reservations;
 interrupted or unmetered requests retain the reservation to bound cost. Account limits
 must also cover any other applications sharing the organization.
+
+The deployed worker sets `YUKI_SHARED_SPEECH=true` and
+`AGENT_IDLE_PROCESSES=0`. One verified Kokoro model belongs to the parent process;
+job processes use an authenticated HTTP client on loopback port 8082. Its FIFO
+queue renders one bounded chunk per caller before accepting the next chunk.
+Only fixed public greetings are cached, keyed by voice, speed and language.
+Private answers are not cached. Do not expose port 8082 or set the generated
+`YUKI_SPEECH_TOKEN`/`YUKI_SPEECH_URL` on the frontend.
+
+Groq requests use Redis FIFO slots per model across all workers. Waiting entries
+and active holders expire after crashes; cancellation removes the caller's entry.
+The bounded queue does not bypass minute or daily provider budgets. Separate
+recognition, response and speech notices keep a queue update from clearing an
+unrelated quota pause.
 
 Keep worker-only Groq and Langfuse credentials off the frontend. TELEMETRY_ENABLED
 is false by default. Enable it only after retention/access settings are approved.

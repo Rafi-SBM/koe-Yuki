@@ -26,10 +26,18 @@ minutes monthly; its allowances are hard caps. Upstash Free includes 500,000
 commands monthly and 256 MB storage. Groq Free has model-specific limits.
 Exhausted free allowances can interrupt the demo; they are not unlimited capacity.
 
-Current application settings allow one call at a time, up to five minutes each,
+Current application settings allow three calls at a time, up to five minutes each,
 with a 100-request and 30,000-token daily provider budget. Per-minute controls are
 15 requests and 6,000 reserved tokens. Provider limits still apply and can be lower.
-Heartbeat traffic also consumes Redis commands.
+These are shared allowances, not per-caller budgets. A typical spoken question
+uses one transcription request and one response request. Heartbeat traffic also
+consumes Redis commands: two commands every 15 seconds while the worker is awake,
+about 346,000 commands in a continuously awake 30-day month.
+
+The worker shares one Kokoro model across job processes and schedules speech
+chunks in FIFO order. Redis also queues provider requests per model. This improves
+resource use without another paid service. The three-user gate must pass before
+raising admission; five slots remain closed. See [capacity evidence](CAPACITY_VERIFICATION.md).
 
 Conversation requests retain instructions and complete recent turns within a
 bounded input reservation. Temporary provider limits pause replies with a notice
@@ -57,3 +65,11 @@ Plan references checked during setup:
 [LiveKit quotas](https://docs.livekit.io/deploy/admin/quotas-and-limits/),
 [Upstash pricing](https://upstash.com/pricing/redis),
 [Groq limits](https://console.groq.com/docs/rate-limits).
+
+Extra Gmail addresses do not provide an approved way to multiply free allowances.
+[Upstash terms](https://upstash.com/trust/terms) allow one free account per person
+or legal entity. Groq limits apply to the organization, and its
+[service agreement](https://console.groq.com/docs/legal/services-agreement)
+prohibits use intended to avoid fees. LiveKit shares allowances across a user's
+free projects. [Vercel fair-use rules](https://vercel.com/docs/limits/fair-use-guidelines)
+prohibit circumventing usage limits. No additional accounts were created.

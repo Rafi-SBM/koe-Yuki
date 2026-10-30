@@ -2,3 +2,5 @@
 -r requirements.txt
 pytest==9.1.1
 pip-audit==2.10.1
+# Pin the packaging toolchain instead of inheriting an unpatched runner copy.
+setuptools==84.2.1

@@ -1,0 +1,241 @@
+{
+  "verified_at": "2026-10-30T21:54:49.404572+05:30",
+  "origin": "https://yuki-voice-agent.vercel.app",
+  "source_commit": "efe3b789fcf294ef4847b42ced26b97059a40f81",
+  "frontend_deployment": {
+    "id": "dpl_6XxS6s6sdLSx2UEeTuaHCEs8iXhf",
+    "url": "yuki-voice-agent-eie8174ao-rafi-luffys-projects.vercel.app",
+    "readyState": "READY",
+    "alias": [
+      "yuki-voice-agent.vercel.app",
+      "yuki-voice-agent-rafi-luffys-projects.vercel.app"
+    ],
+    "createdAt": 1793377225123
+  },
+  "worker": {
+    "id": "CA_MudVVq9fQ58V",
+    "version": "x8AWbcBLZURr",
+    "region": "ap-south",
+    "replicas": 1,
+    "cpu_limit": 2,
+    "memory_limit_gib": 4,
+    "shared_speech_model": true,
+    "idle_job_processes": 0
+  },
+  "checks": {
+    "frontend_tests": 30,
+    "python_tests": 27,
+    "python_subtests": 4,
+    "shared_redis_fifo_and_cancellation": "passed on real Redis using isolated test-only keys; provider budgets untouched",
+    "typecheck": "passed",
+    "lint": "passed",
+    "production_build": "passed locally and on Vercel",
+    "python_compilation": "passed",
+    "python_dependencies": "compatible",
+    "compose_config": "passed"
+  },
+  "admission_limit": 3,
+  "five_slots_open": false,
+  "staging_gate": {
+    "gate_passed": true,
+    "users": 3,
+    "rounds": 3,
+    "spoken_answers": 9,
+    "separate_rooms": true,
+    "fourth_call_status": 429,
+    "same_sessions_survived": true,
+    "max_first_audio_ms": 4971,
+    "latency_budget_ms": 15000,
+    "startup_ms": [
+      24413,
+      11791,
+      44919
+    ],
+    "duration_seconds": 89.0,
+    "results": [
+      {
+        "caller": 1,
+        "round": 1,
+        "question": "japan",
+        "answer": "tokyo",
+        "voice": "af_bella",
+        "first_audio_ms": 4971,
+        "audible_frames": 55,
+        "queue_notices": 3
+      },
+      {
+        "caller": 2,
+        "round": 1,
+        "question": "france",
+        "answer": "paris",
+        "voice": "am_adam",
+        "first_audio_ms": 3771,
+        "audible_frames": 51,
+        "queue_notices": 2
+      },
+      {
+        "caller": 3,
+        "round": 1,
+        "question": "italy",
+        "answer": "rome",
+        "voice": "bf_emma",
+        "first_audio_ms": 2694,
+        "audible_frames": 54,
+        "queue_notices": 0
+      },
+      {
+        "caller": 1,
+        "round": 2,
+        "question": "france",
+        "answer": "paris",
+        "voice": "af_bella",
+        "first_audio_ms": 3525,
+        "audible_frames": 49,
+        "queue_notices": 2
+      },
+      {
+        "caller": 2,
+        "round": 2,
+        "question": "italy",
+        "answer": "rome",
+        "voice": "am_adam",
+        "first_audio_ms": 2583,
+        "audible_frames": 49,
+        "queue_notices": 0
+      },
+      {
+        "caller": 3,
+        "round": 2,
+        "question": "japan",
+        "answer": "tokyo",
+        "voice": "bf_emma",
+        "first_audio_ms": 4481,
+        "audible_frames": 64,
+        "queue_notices": 4
+      },
+      {
+        "caller": 1,
+        "round": 3,
+        "question": "italy",
+        "answer": "rome",
+        "voice": "af_bella",
+        "first_audio_ms": 2699,
+        "audible_frames": 41,
+        "queue_notices": 0
+      },
+      {
+        "caller": 2,
+        "round": 3,
+        "question": "japan",
+        "answer": "tokyo",
+        "voice": "am_adam",
+        "first_audio_ms": 3677,
+        "audible_frames": 67,
+        "queue_notices": 3
+      },
+      {
+        "caller": 3,
+        "round": 3,
+        "question": "france",
+        "answer": "paris",
+        "voice": "bf_emma",
+        "first_audio_ms": 4741,
+        "audible_frames": 111,
+        "queue_notices": 4
+      }
+    ]
+  },
+  "production_gate": {
+    "gate_passed": true,
+    "users": 3,
+    "rounds": 1,
+    "spoken_answers": 3,
+    "separate_rooms": true,
+    "fourth_call_status": 429,
+    "same_sessions_survived": true,
+    "max_first_audio_ms": 4997,
+    "latency_budget_ms": 15000,
+    "startup_ms": [
+      13187,
+      13338,
+      10496
+    ],
+    "duration_seconds": 38.8,
+    "results": [
+      {
+        "caller": 1,
+        "round": 1,
+        "question": "japan",
+        "answer": "tokyo",
+        "voice": "af_bella",
+        "first_audio_ms": 4997,
+        "audible_frames": 55,
+        "queue_notices": 3
+      },
+      {
+        "caller": 2,
+        "round": 1,
+        "question": "france",
+        "answer": "paris",
+        "voice": "am_adam",
+        "first_audio_ms": 3817,
+        "audible_frames": 52,
+        "queue_notices": 2
+      },
+      {
+        "caller": 3,
+        "round": 1,
+        "question": "italy",
+        "answer": "rome",
+        "voice": "bf_emma",
+        "first_audio_ms": 2833,
+        "audible_frames": 54,
+        "queue_notices": 0
+      }
+    ]
+  },
+  "browser_regression": {
+    "origin": "https://yuki-voice-agent.vercel.app",
+    "mode": "browser-regression",
+    "consent_before_admission": true,
+    "preferences_focus_escape": true,
+    "diagnostic_failure_handled": true,
+    "sandbox_mute_and_cleanup": true,
+    "mobile_no_overflow": true,
+    "reduced_motion": true,
+    "page_errors": [],
+    "passed": true
+  },
+  "browser_live": {
+    "origin": "https://yuki-voice-agent.vercel.app",
+    "mode": "live",
+    "consent_before_admission": true,
+    "live_connection": true,
+    "reconnect_keeps_mute": true,
+    "tracks_and_connections_closed": true,
+    "mobile_no_overflow": true,
+    "reduced_motion": true,
+    "page_errors": [],
+    "passed": true
+  },
+  "resource_observation": {
+    "warning": "Cloud resource samples returned pre-test timestamps, so these do not measure active three-caller peak memory or CPU. No peak-resource claim is made. The deployed worker remained running and all three jobs completed.",
+    "fresh_post_test_idle_memory_bytes": "1382543361",
+    "fresh_post_test_sample_at": "2026-10-30T16:21:00.073415Z"
+  },
+  "cost_controls": {
+    "plans": "Vercel Hobby, LiveKit Build, Upstash Free, Groq Free; unchanged",
+    "new_accounts": 0,
+    "new_paid_services": 0,
+    "max_session_seconds": 300,
+    "daily_provider_requests": 100,
+    "daily_provider_tokens": 30000,
+    "per_model_requests_per_minute": 15,
+    "reserved_tokens_per_minute": 6000
+  },
+  "limitations": [
+    "Synthetic short questions and replies, not a long-running capacity or physical mobile microphone certification.",
+    "Startup included process scheduling: 12\u201345 seconds in the staging run.",
+    "Free provider allowances remain shared; queueing cannot expand them."
+  ]
+}

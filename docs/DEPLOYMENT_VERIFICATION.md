@@ -4,6 +4,9 @@ Follow-up fixes and longer conversation/preview evidence are recorded in
 [recovery verification](RECOVERY_VERIFICATION.md). The original launch evidence
 below predates those fixes.
 
+The later [three-user capacity verification](CAPACITY_VERIFICATION.md) supersedes
+the original one-call admission limit reported below.
+
 Verified 30 October 2026, India time, against
 [yuki-voice-agent.vercel.app](https://yuki-voice-agent.vercel.app).
 The frontend is on the owner's Vercel Hobby account. The Python worker is deployed
@@ -68,7 +71,9 @@ Repeat browser checks with `scripts/check-browser.py`. Repeat real speech and
 interruption checks with `agent/tests/test_livekit_e2e.py` and
 `agent/tests/test_barge_in.py`, supplying the origin and access code privately.
 
-Source history is local Git history with four-word commit subjects. No GitHub remote
-was configured or pushed; future releases currently use the documented Vercel and
-LiveKit CLI deployment commands. See [hosting limits](HOSTING.md) and
+Source is published at [Rafi-SBM/koe-Yuki](https://github.com/Rafi-SBM/koe-Yuki)
+with four-word commit subjects. The evidence above records the original deployment
+before publication; its original source hashes are mapped in the
+[repository history guide](REPOSITORY_HISTORY.md). Releases use the documented
+Vercel and LiveKit CLI deployment commands. See [hosting limits](HOSTING.md) and
 [deployment instructions](../deploy/README.md).

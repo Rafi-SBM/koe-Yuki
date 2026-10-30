@@ -5,10 +5,14 @@ and Kokoro speech synthesis on a Python worker. It supports English, Japanese,
 Mandarin Chinese, Hindi, Spanish, French, and Italian speech. Voice previews play
 packaged samples of the actual Kokoro voices used during live calls.
 
+Source: [Rafi-SBM/koe-Yuki](https://github.com/Rafi-SBM/koe-Yuki).
+
 Personal demo: [yuki-voice-agent.vercel.app](https://yuki-voice-agent.vercel.app).
 Live calls require the owner's access code. The frontend runs on Vercel Hobby,
 the worker on LiveKit Build, shared controls on Upstash Free, and inference on
 Groq Free. See [current hosting and free limits](docs/HOSTING.md).
+Three simultaneous callers have passed the hosted capacity gate; see
+[capacity verification](docs/CAPACITY_VERIFICATION.md).
 
 The deployed personal demo has shared controls and real voice/browser verification.
 Free quotas and automatic worker startup limit availability. See
@@ -63,15 +67,19 @@ scripts/check-local.sh
 # With a worker connected to the same LiveKit project:
 agent/venv/bin/python agent/eval_harness.py
 agent/venv/bin/python agent/tests/test_livekit_e2e.py
-agent/venv/bin/python agent/tests/test_concurrency.py --users 2
+agent/venv/bin/python agent/tests/test_concurrency.py --users 1
 agent/venv/bin/python agent/tests/test_barge_in.py
+# Three callers with separately generated Japan, France and Italy questions:
+agent/venv/bin/python agent/tests/test_three_callers.py --help
 ```
 
 Live gates use synthetic speech, require the recognized question and a spoken
 Tokyo answer, check settings acknowledgements, and release room/audio resources.
 They fail on missing required providers/assets, silence, incorrect answers, or a
-five-second first-audio budget. Two samples are a smoke test, not a reliable p95
-estimate. Repeat at intended concurrency during a staging soak.
+five-second first-audio budget for a single caller. The three-caller gate uses a
+15-second contention budget and checks independent answers and rejection of a
+fourth caller. Small samples are smoke tests, not reliable p95 estimates. Repeat
+at intended concurrency during a staging soak.
 
 ## Production
 
@@ -80,7 +88,8 @@ Required controls include a dedicated Redis REST database shared by frontend and
 worker, an HTTPS application origin, ingress that supplies a trustworthy client IP,
 a random session signing secret, and an explicit access policy. A private access
 code is the default beta policy. Calls default to five minutes, one concurrent
-session, and bounded per-minute/daily provider budgets. Set limits below your
+session in the example configuration. The hosted demo admits three concurrent
+callers with bounded per-minute/daily provider budgets. Set limits below your
 actual allocation; multiple keys do not multiply an organization's quota.
 
 Raw audio is not recorded by this application. Raw transcripts are not logged or
@@ -91,3 +100,6 @@ retention policies before launch. Optional Langfuse exports only application tur
 metadata/character counts, is off by default, and filters SDK spans containing text.
 
 No deployment or commits are performed by the local verification scripts.
+GitHub Actions verifies pushes and pull requests. See the
+[repository history guide](docs/REPOSITORY_HISTORY.md) for commit organization and
+the source references in deployment evidence.

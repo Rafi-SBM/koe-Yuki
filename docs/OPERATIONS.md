@@ -7,6 +7,14 @@ worker heartbeat. A model checksum or prewarm failure prevents the worker from
 accepting jobs. Monitor provider errors and daily budget rejections separately:
 a ready worker is not proof that Groq is currently answering.
 
+The current hosted admission limit is three, with one shared speech model per
+worker. Do not raise it to five without repeating the capacity gate. Provider and
+speech queues are bounded and cancel abandoned waits; a queue notice should keep
+the existing call connected. A fourth caller receives a capacity response.
+If a process crashes, provider slots expire within 30 seconds, abandoned waiters
+within 60 seconds, and readiness within 45 seconds. The call's signed deadline
+still limits the session. Shared store failures must fail closed.
+
 Scrape worker port 9090/metrics internally. The SDK uses a multiprocess registry
 for worker/job metrics. Logs include subsystem durations, utterance character
 counts and user-to-agent state transitions; no raw application transcripts.
