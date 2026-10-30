@@ -47,3 +47,6 @@ models/*.bin
 
 # Extra notes, legacy reference docs, and guides
 Extras/
+
+# Vercel project links and local deployment credentials
+.vercel/
