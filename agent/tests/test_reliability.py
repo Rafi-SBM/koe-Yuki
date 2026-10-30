@@ -143,3 +143,33 @@ def test_worker_requires_a_live_lease_and_rejects_cleanup_grace():
             with patch('shared_store.command',new=AsyncMock(side_effect=APIError('unavailable'))):
                 assert not await room_is_admitted('synthetic-room')
     asyncio.run(run())
+
+
+def test_heartbeat_starts_without_a_load_callback_and_only_once():
+    import shared_store
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+    worker = SimpleNamespace(_closed=False, _connecting=False, _draining=False,
+                             active_jobs=[], _proc_pool=SimpleNamespace(
+                                 _warmed_proc_queue=SimpleNamespace(qsize=lambda: 1)))
+    commands = []
+
+    async def command(*items):
+        commands.append(items)
+        if items[0] == 'ZADD':
+            worker._closed = True
+        return 1
+
+    async def run():
+        shared_store._heartbeat_task = None
+        try:
+            with patch('shared_store.command', side_effect=command), patch('shared_store.asyncio.sleep', new=AsyncMock()):
+                task = shared_store.start_worker_heartbeat(worker)
+                assert shared_store.start_worker_heartbeat(worker) is task
+                await task
+            assert [item[0] for item in commands] == ['SET', 'ZADD']
+            assert json.loads(commands[0][2]) == {'ready': True, 'accepting': True, 'active': 0}
+            assert commands[0][-2:] == ('EX', 20)
+        finally:
+            shared_store._heartbeat_task = None
+    asyncio.run(run())

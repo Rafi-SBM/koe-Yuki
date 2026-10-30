@@ -80,11 +80,11 @@ async def settle_provider_budget(reservation, actual_tokens):
 _worker_id = '{yuki}:worker:' + str(uuid.uuid4())
 _heartbeat_task = None
 
-def worker_load(worker):
+def start_worker_heartbeat(worker):
+    """Start from the server event loop; Cloud replaces custom load callbacks."""
     global _heartbeat_task
     maximum = max(1, int(os.getenv('MAX_CONCURRENT_SESSIONS', '1')))
-    load = min(1.0, len(worker.active_jobs) / maximum)
-    if _heartbeat_task is None:
+    if _heartbeat_task is None or _heartbeat_task.done():
         async def heartbeat():
             while not worker._closed:
                 try:
@@ -98,5 +98,5 @@ def worker_load(worker):
                     import logging
                     logging.getLogger('voice_agent.readiness').warning('Readiness heartbeat unavailable')
                 await asyncio.sleep(5)
-        _heartbeat_task = asyncio.run_coroutine_threadsafe(heartbeat(), worker._loop)
-    return load
+        _heartbeat_task = asyncio.create_task(heartbeat(), name='yuki-worker-heartbeat')
+    return _heartbeat_task

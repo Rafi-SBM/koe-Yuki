@@ -33,6 +33,7 @@ from livekit.agents import (
     JobProcess,
     JobRequest,
     WorkerOptions,
+    AgentServer,
     cli,
     llm,
     stt,
@@ -47,7 +48,7 @@ from livekit.plugins import silero, groq
 
 from key_pool import get_global_key_pool
 from provider import PooledGroqLLM, next_key, failed_key, retryable
-from shared_store import provider_budget, worker_load, room_is_admitted
+from shared_store import provider_budget, start_worker_heartbeat, room_is_admitted
 from prompts import YUKI_VOICE_SYSTEM_PROMPT, YUKI_GREETING
 from kokoro_engine import KokoroLiveKitTTS
 from knowledge import LocalKnowledgeBase
@@ -446,7 +447,7 @@ async def entrypoint(ctx: JobContext):
 
 
 if __name__ == "__main__":
-    cli.run_app(
+    server = AgentServer.from_server_options(
         WorkerOptions(
             agent_name=os.getenv("LIVEKIT_AGENT_NAME", ""),
             entrypoint_fnc=entrypoint,
@@ -456,8 +457,6 @@ if __name__ == "__main__":
             # add processes under load and replicas handle horizontal scale.
             num_idle_processes=max(1, int(os.getenv("AGENT_IDLE_PROCESSES", "1"))),
             initialize_process_timeout=90.0,
-            load_fnc=worker_load,
-            load_threshold=0.99,
             port=int(os.getenv("PORT", "8081")),
             shutdown_process_timeout=20.0,
             drain_timeout=360.0,
@@ -465,3 +464,5 @@ if __name__ == "__main__":
             prometheus_multiproc_dir=os.getenv("PROMETHEUS_MULTIPROC_DIR", "/tmp/yuki-prometheus"),
         )
     )
+    server.on("worker_started", lambda: start_worker_heartbeat(server))
+    cli.run_app(server)
