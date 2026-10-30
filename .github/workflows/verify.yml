@@ -1,0 +1,44 @@
+name: Verify release
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run typecheck && npm run lint && npm test && npm audit --audit-level=moderate && npm run build
+        working-directory: frontend
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r agent/requirements-dev.txt
+      - run: pip check && pip-audit && python -m pytest agent/tests/test_unit.py agent/tests/test_reliability.py -q
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --no-interpolate --quiet
+      - run: docker build -t yuki-frontend:check frontend
+      - run: docker build -t yuki-agent:check agent
+      - run: |
+          docker run -d --name yuki-web-check -p 127.0.0.1:3000:3000 yuki-frontend:check
+          trap 'docker rm -f yuki-web-check' EXIT
+          for attempt in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/api/live && break || sleep 1; done
+          curl -fsS http://127.0.0.1:3000/api/live
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/health)" = 503
+      - run: docker run --rm yuki-agent:check python src/verify_models.py
