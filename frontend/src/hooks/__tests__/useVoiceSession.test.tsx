@@ -1,0 +1,66 @@
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useVoiceSession } from "../useVoiceSession";
+const mocks = vi.hoisted(() => ({ rooms: [] as object[], failMic: false }));
+vi.mock("livekit-client", () => {
+  const events = { TrackSubscribed: "track", TrackUnsubscribed: "untrack", LocalTrackPublished: "local", ActiveSpeakersChanged: "speakers", ConnectionQualityChanged: "quality", DataReceived: "data", ParticipantDisconnected: "left", ConnectionStateChanged: "state" };
+  class MockRoom {
+    state = "connected"; remoteParticipants = new Map(); handlers = new Map();
+    microphone = { stop: vi.fn(), mediaStreamTrack: { enabled: true } };
+    localParticipant = { audioTrackPublications: new Map([["mic", { track: this.microphone }]]),
+      getTrackPublication: () => ({ track: this.microphone }),
+      setMicrophoneEnabled: vi.fn(async (enabled: boolean) => { if (mocks.failMic) throw new Error("Not supported"); this.microphone.mediaStreamTrack.enabled = enabled; }),
+      publishData: vi.fn(async (payload: Uint8Array) => { const packet = JSON.parse(new TextDecoder().decode(payload)); if (["hello", "settings"].includes(packet.type)) this.handlers.get("data")?.(new TextEncoder().encode(JSON.stringify({ protocol: "yuki.control.v1", type: packet.type === "hello" ? "ready" : "settings_ack", id: packet.id })), { kind: 4 }, undefined, "yuki.control"); }) };
+    constructor() { mocks.rooms.push(this); }
+    on(event: string, handler: unknown) { this.handlers.set(event, handler); return this; }
+    connect = vi.fn().mockResolvedValue(undefined); disconnect = vi.fn().mockResolvedValue(undefined); startAudio = vi.fn().mockResolvedValue(undefined); switchActiveDevice = vi.fn().mockResolvedValue(undefined);
+  }
+  return { Room: MockRoom, RoomEvent: events, Track: { Source: { Microphone: "microphone" }, Kind: { Audio: "audio" } }, ParticipantKind: { AGENT: 4 }, ConnectionState: { Connected: "connected", Disconnected: "disconnected" }, ConnectionQuality: { Excellent: "excellent", Good: "good", Poor: "poor", Lost: "lost", Unknown: "unknown" } };
+});
+function stream() { const track = { enabled: true, stop: vi.fn() }; return { track, getTracks: () => [track], getAudioTracks: () => [track] }; }
+beforeEach(() => {
+  mocks.rooms.length = 0; mocks.failMic = false;
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ isConfigured: true, token: "test", serverUrl: "wss://test", lease: "lease", deadline: Date.now() + 300000 }) }));
+});
+afterEach(() => vi.unstubAllGlobals());
+describe("microphone lifecycle", () => {
+  it("keeps the sandbox microphone muted across stop, restart and device changes", async () => {
+    const first = stream(), second = stream(), third = stream();
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn().mockResolvedValueOnce(first).mockResolvedValueOnce(second).mockResolvedValueOnce(third) } });
+    const { result, unmount } = renderHook(useVoiceSession);
+    await act(() => result.current.startSandbox()); await act(() => result.current.toggleMic());
+    expect(first.track.enabled).toBe(false);
+    act(() => result.current.disconnect()); expect(first.track.stop).toHaveBeenCalled();
+    await act(() => result.current.startSandbox()); expect(result.current.isMicMuted).toBe(true); expect(second.track.enabled).toBe(false);
+    await act(() => result.current.switchActiveDevice("other")); expect(second.track.stop).toHaveBeenCalled(); expect(third.track.enabled).toBe(false);
+    unmount(); expect(third.track.stop).toHaveBeenCalled();
+  });
+  it("cleans up a room when microphone publication fails", async () => {
+    mocks.failMic = true;
+    const { result } = renderHook(useVoiceSession);
+    await act(() => result.current.connect());
+    const room = mocks.rooms[0] as { disconnect: ReturnType<typeof vi.fn>; microphone: { stop: ReturnType<typeof vi.fn> } };
+    expect(room.disconnect).toHaveBeenCalled(); expect(room.microphone.stop).toHaveBeenCalled(); expect(result.current.isConnected).toBe(false);
+    expect(result.current.configNotice).toContain("Not supported");
+  });
+  it("applies retained mute state before reporting a live connection and waits for settings ACK", async () => {
+    const { result, unmount } = renderHook(useVoiceSession);
+    await act(() => result.current.toggleMic()); await act(() => result.current.connect());
+    const room = mocks.rooms[0] as { localParticipant: { setMicrophoneEnabled: ReturnType<typeof vi.fn>; publishData: ReturnType<typeof vi.fn> } };
+    expect(room.localParticipant.setMicrophoneEnabled).toHaveBeenCalledWith(false, expect.any(Object));
+    expect(room.localParticipant.publishData.mock.calls.length).toBe(2); expect(result.current.isConnected).toBe(true);
+    mocks.failMic = true; await act(() => result.current.toggleMic()); expect(result.current.isMicMuted).toBe(true);
+    unmount();
+  });
+  it("stops a microphone obtained after a cancelled sandbox start", async () => {
+    let complete!: (value: unknown) => void;
+    const audio = stream();
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: () => new Promise(resolve => { complete = resolve; }) } });
+    const { result } = renderHook(useVoiceSession);
+    let connecting!: Promise<void>;
+    act(() => { connecting = result.current.startSandbox(); }); act(() => result.current.disconnect());
+    await act(async () => { complete(audio); await connecting; });
+    expect(audio.track.stop).toHaveBeenCalled(); expect(result.current.isConnected).toBe(false);
+    await waitFor(() => expect(result.current.isConnecting).toBe(false));
+  });
+});
