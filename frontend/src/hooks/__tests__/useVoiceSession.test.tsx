@@ -24,6 +24,21 @@ beforeEach(() => {
 });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("microphone lifecycle", () => {
+  it("shows a free-limit pause without disconnecting and clears it after recovery", async () => {
+    const { result, unmount } = renderHook(useVoiceSession);
+    await act(() => result.current.connect());
+    const room = mocks.rooms[0] as { handlers: Map<string, (...args: unknown[]) => void>; disconnect: ReturnType<typeof vi.fn>; microphone: { stop: ReturnType<typeof vi.fn> } };
+    const notice = (message: string | null) => room.handlers.get("data")!(new TextEncoder().encode(JSON.stringify({ protocol: "yuki.control.v1", type: "notice", message })), { kind: 4 }, undefined, "yuki.control");
+    act(() => notice("The free service needs a short pause. Please try again in 12 seconds."));
+    expect(result.current.isConnected).toBe(true);
+    expect(result.current.configNotice).toContain("12 seconds");
+    expect(room.disconnect).not.toHaveBeenCalled();
+    expect(room.microphone.stop).not.toHaveBeenCalled();
+    act(() => notice(null));
+    expect(result.current.configNotice).toBeNull();
+    expect(result.current.isConnected).toBe(true);
+    unmount();
+  });
   it("waits through a cloud cold start without capturing audio before the worker handshake", async () => {
     vi.useFakeTimers(); mocks.acknowledge = false;
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ isConfigured: true, token: "test", serverUrl: "wss://test", lease: "lease", deadline: Date.now() + 300000, startupTimeoutMs: 90000 }) }));

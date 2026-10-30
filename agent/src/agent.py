@@ -12,6 +12,8 @@ import asyncio
 import logging
 import math
 import re
+import httpx
+import groq as groq_client
 from typing import Optional
 import numpy as np
 import soundfile as sf
@@ -46,9 +48,9 @@ from livekit.agents.voice.agent_session import SessionConnectOptions
 from livekit.agents.voice.room_io import RoomOptions
 from livekit.plugins import silero, groq
 
-from key_pool import get_global_key_pool
-from provider import PooledGroqLLM, next_key, failed_key, retryable
-from shared_store import provider_budget, start_worker_heartbeat, room_is_admitted
+from key_pool import get_global_key_pool, PoolUnavailable
+from provider import PooledGroqLLM, next_key, failed_key, retryable, provider_notice, send_notice
+from shared_store import ProviderBudgetExceeded, provider_budget, start_worker_heartbeat, room_is_admitted
 from prompts import YUKI_VOICE_SYSTEM_PROMPT, YUKI_GREETING
 from kokoro_engine import KokoroLiveKitTTS
 from knowledge import LocalKnowledgeBase
@@ -76,12 +78,17 @@ class GroqWhisperSTT(stt.STT):
         self._model = model
         self._language = language
         self._key_pool = get_global_key_pool()
+        self.on_notice = None
 
     async def _recognize_impl(self, buffer, *, language=None, conn_options=None):
         try:
             async with asyncio.timeout(20):
                 return await self._recognize_bounded(buffer, language=language, conn_options=conn_options)
         except asyncio.CancelledError: raise
+        except (APIError, groq_client.APIError, httpx.TransportError, TimeoutError, PoolUnavailable) as error:
+            logger.warning('Speech recognition paused (%s; reason=%s)', type(error).__name__, getattr(error, 'reason', 'provider'))
+            await send_notice(self.on_notice, provider_notice(error))
+            return stt.SpeechEvent(type=stt.SpeechEventType.FINAL_TRANSCRIPT, alternatives=[])
         except Exception as error:
             raise APIError("Speech recognition is temporarily unavailable", retryable=False) from error
 
@@ -93,7 +100,7 @@ class GroqWhisperSTT(stt.STT):
         conn_options: Optional[object] = None
     ) -> stt.SpeechEvent:
         frame = utils.merge_frames(buffer)
-        if frame.samples_per_channel / frame.sample_rate > 30: raise APIError("Please use shorter spoken turns", retryable=False)
+        if frame.samples_per_channel / frame.sample_rate > 30: raise ProviderBudgetExceeded('speech_length')
         pcm_bytes = frame.data.tobytes()
         samples = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
 
@@ -274,6 +281,10 @@ async def entrypoint(ctx: JobContext):
     preferences_ready = asyncio.Event()
     async def publish(message, reliable=True):
         await ctx.room.local_participant.publish_data(json.dumps({"protocol": "yuki.control.v1", **message}), reliable=reliable, topic="yuki.control", destination_identities=[owner])
+    async def notify_provider(message):
+        await publish({"type": "notice", "message": message})
+    llm_engine.on_notice = notify_provider
+    groq_stt_raw.on_notice = notify_provider
     tasks = set()
     def spawn(coro):
         task = asyncio.create_task(coro)

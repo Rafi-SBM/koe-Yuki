@@ -3,13 +3,54 @@ import asyncio
 import os
 import json
 import logging
+import uuid
 import httpx
 import openai
 from retry_policy import retry_seconds
 from livekit.agents import llm, APIConnectOptions, APIError, APIStatusError
 from livekit.plugins import groq
 from key_pool import get_global_key_pool, PoolUnavailable
-from shared_store import provider_budget, settle_provider_budget, shared_key_cooldown, mark_shared_key_cooldown
+from shared_store import ProviderBudgetExceeded, provider_budget, settle_provider_budget, shared_key_cooldown, mark_shared_key_cooldown
+
+def request_estimate(context, tools):
+    schemas = [llm.utils.build_legacy_openai_schema(tool) for tool in tools]
+    messages, _ = context.to_provider_format('openai')
+    return len(json.dumps(messages, ensure_ascii=False).encode('utf8')) + len(json.dumps(schemas, ensure_ascii=False).encode('utf8')) + 512
+
+def bounded_context(context, tools):
+    """Keep instructions and complete recent user turns within one reservation.
+
+    Do not mutate the session transcript or drop part of a tool-call/result pair.
+    A single oversized turn is declined with a useful notice instead of truncated.
+    """
+    budget = min(4096, max(256, int(os.getenv('GROQ_TPM_LIMIT', '8000'))))
+    items = context.items
+    instructions = [item for item in items if item.type == 'message' and item.role in ('system', 'developer')]
+    conversation = [item for item in items if item not in instructions]
+    starts = [index for index, item in enumerate(conversation) if item.type == 'message' and item.role == 'user'] or [0]
+    for start in starts:
+        candidate = llm.ChatContext(instructions + conversation[start:])
+        estimate = request_estimate(candidate, tools)
+        if estimate <= budget:
+            return candidate, estimate
+    raise ProviderBudgetExceeded('request_size')
+
+def provider_notice(error):
+    if isinstance(error, ProviderBudgetExceeded):
+        if error.reason == 'daily':
+            return "Today's free allowance has been used up. Please come back tomorrow."
+        if error.reason in ('request_size', 'speech_length'):
+            return 'That question is too long for the free voice service. Please try a shorter question.'
+        return f'The free service needs a short pause. Please try again in {max(1, error.retry_after)} seconds.'
+    return 'I could not answer that turn because the service is temporarily busy. Please try again in a moment.'
+
+async def send_notice(handler, message):
+    if handler is not None:
+        try:
+            async with asyncio.timeout(3):
+                await handler(message)
+        except Exception:
+            logging.getLogger('voice_agent.provider').warning('Provider notice could not be delivered')
 
 def retryable(error):
     status = getattr(error, 'status_code', None)
@@ -38,6 +79,7 @@ class PooledGroqLLM(llm.LLM):
         self.pool = pool or get_global_key_pool()
         self.engines = {}
         self.clients = {}
+        self.on_notice = None
     @property
     def model(self): return os.getenv('GROQ_LLM_MODEL', 'openai/gpt-oss-120b')
     @property
@@ -68,27 +110,34 @@ class PooledStream(llm.LLMStream):
     async def _run(self):
         emitted = False
         try:
+            context, estimate = bounded_context(self._chat_ctx, self._tools)
             async with asyncio.timeout(20):
                 for attempt in range(min(3, self._llm.pool.total_keys)):
                     key = await next_key(self._llm.pool)
-                    # Conservative UTF-8 bound includes tools and the completion ceiling.
-                    schemas = [llm.utils.build_legacy_openai_schema(tool) for tool in self._tools]
-                    messages, _ = self._chat_ctx.to_provider_format('openai')
-                    estimate = len(json.dumps(messages, ensure_ascii=False).encode('utf8')) + len(json.dumps(schemas, ensure_ascii=False).encode('utf8')) + 512
+                    # Keep the conservative UTF-8 reservation and all hard quotas.
                     reservation = await provider_budget(self._llm.model, estimate)
                     usage = None
                     try:
-                        async with self._llm.engine(key).chat(chat_ctx=self._chat_ctx, tools=self._tools, conn_options=APIConnectOptions(max_retry=0, timeout=8), **self.options) as stream:
+                        async with self._llm.engine(key).chat(chat_ctx=context, tools=self._tools, conn_options=APIConnectOptions(max_retry=0, timeout=8), **self.options) as stream:
                             async for chunk in stream:
                                 if chunk.usage is not None: usage = chunk.usage
                                 emitted = True
                                 self._event_ch.send_nowait(chunk)
                         if usage is not None: await settle_provider_budget(reservation, usage.total_tokens)
+                        await send_notice(self._llm.on_notice, None)
                         return
                     except Exception as error:
+                        if not emitted and getattr(error, 'status_code', None) in (401, 403, 429):
+                            await settle_provider_budget(reservation, 0)
                         await failed_key(self._llm.pool, key, error)
                         if emitted or not retryable(error) or attempt + 1 >= min(3, self._llm.pool.total_keys): raise
         except asyncio.CancelledError: raise
         except Exception as error:
-            logging.getLogger('voice_agent.provider').warning('Language provider failed (%s)', type(error).__name__)
+            logging.getLogger('voice_agent.provider').warning('Language provider paused (%s; reason=%s)', type(error).__name__, getattr(error, 'reason', 'provider'))
+            if isinstance(error, (APIError, openai.APIError, httpx.TransportError, TimeoutError, PoolUnavailable)):
+                message = 'That response was interrupted. Please ask again.' if emitted else provider_notice(error)
+                await send_notice(self._llm.on_notice, message)
+                if not emitted:
+                    self._event_ch.send_nowait(llm.ChatChunk(id=str(uuid.uuid4()), delta=llm.ChoiceDelta(role='assistant', content=message)))
+                return
             raise APIError('The language provider is unavailable', retryable=False) from None

@@ -9,6 +9,13 @@ import uuid
 import aiohttp
 from livekit.agents import APIError
 
+class ProviderBudgetExceeded(APIError):
+    """An expected free-plan pause, not a broken voice session."""
+    def __init__(self, reason, retry_after=0):
+        super().__init__('Provider budget paused', retryable=False)
+        self.reason = reason
+        self.retry_after = max(0, int(retry_after))
+
 async def command(*items):
     url, token = os.getenv('UPSTASH_REDIS_REST_URL'), os.getenv('UPSTASH_REDIS_REST_TOKEN')
     if not url or not token:
@@ -45,22 +52,27 @@ async def provider_budget(model, estimated_tokens):
     tpm = max(256, int(os.getenv('GROQ_TPM_LIMIT', '8000')))
     daily_requests = max(1, int(os.getenv('DAILY_PROVIDER_REQUEST_LIMIT', '500')))
     daily_tokens = max(256, int(os.getenv('GROQ_DAILY_TOKEN_LIMIT', '200000')))
+    if estimated_tokens > tpm:
+        raise ProviderBudgetExceeded('request_size')
     now = int(time.time() // 60)
     key = f'{{yuki}}:quota:{model}:{now}'
     day_key = f'{{yuki}}:quota:day:{now // 1440}'
-    lua = "local r=tonumber(redis.call('HGET',KEYS[1],'r') or 0); local t=tonumber(redis.call('HGET',KEYS[1],'t') or 0); local dr=tonumber(redis.call('HGET',KEYS[2],'r') or 0); local dt=tonumber(redis.call('HGET',KEYS[2],'t') or 0); if r>=tonumber(ARGV[1]) or t+tonumber(ARGV[3])>tonumber(ARGV[2]) or dr>=tonumber(ARGV[4]) or dt+tonumber(ARGV[3])>tonumber(ARGV[5]) then return 0 end; redis.call('HINCRBY',KEYS[1],'r',1); redis.call('HINCRBY',KEYS[1],'t',ARGV[3]); redis.call('EXPIRE',KEYS[1],120); redis.call('HINCRBY',KEYS[2],'r',1); redis.call('HINCRBY',KEYS[2],'t',ARGV[3]); redis.call('EXPIRE',KEYS[2],172800); return 1"
+    lua = "local r=tonumber(redis.call('HGET',KEYS[1],'r') or 0); local t=tonumber(redis.call('HGET',KEYS[1],'t') or 0); local dr=tonumber(redis.call('HGET',KEYS[2],'r') or 0); local dt=tonumber(redis.call('HGET',KEYS[2],'t') or 0); if dr>=tonumber(ARGV[4]) or dt+tonumber(ARGV[3])>tonumber(ARGV[5]) then return -2 end; if r>=tonumber(ARGV[1]) or t+tonumber(ARGV[3])>tonumber(ARGV[2]) then return -1 end; redis.call('HINCRBY',KEYS[1],'r',1); redis.call('HINCRBY',KEYS[1],'t',ARGV[3]); redis.call('EXPIRE',KEYS[1],120); redis.call('HINCRBY',KEYS[2],'r',1); redis.call('HINCRBY',KEYS[2],'t',ARGV[3]); redis.call('EXPIRE',KEYS[2],172800); return 1"
     result = await command('EVAL', lua, 2, key, day_key, rpm, tpm, estimated_tokens, daily_requests, daily_tokens)
     if result is None:
         # Development fallback only. Production always uses shared atomic counters.
         if _local_daily['day'] != now // 1440: _local_daily.update(day=now // 1440, requests=0, tokens=0)
         bucket = _local_budget.get(model, (now, 0, 0))
         _, requests, tokens = bucket if bucket[0] == now else (now, 0, 0)
-        result = int(requests < rpm and tokens + estimated_tokens <= tpm and _local_daily['requests'] < daily_requests and _local_daily['tokens'] + estimated_tokens <= daily_tokens)
-        if result:
+        result = -2 if _local_daily['requests'] >= daily_requests or _local_daily['tokens'] + estimated_tokens > daily_tokens else -1 if requests >= rpm or tokens + estimated_tokens > tpm else 1
+        if result == 1:
             _local_budget[model] = (now, requests + 1, tokens + estimated_tokens)
             _local_daily['requests'] += 1
             _local_daily['tokens'] += estimated_tokens
-    if result != 1: raise APIError('Provider budget exhausted; please retry later', retryable=False)
+    if result != 1:
+        daily = result == -2
+        period = 86400 if daily else 60
+        raise ProviderBudgetExceeded('daily' if daily else 'minute', period - int(time.time()) % period)
     return (model, now, estimated_tokens, result is not None and bool(os.getenv('UPSTASH_REDIS_REST_URL')))
 
 async def settle_provider_budget(reservation, actual_tokens):

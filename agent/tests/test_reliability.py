@@ -69,11 +69,78 @@ def test_llm_fails_over_once_before_any_output():
 
 def test_llm_never_replays_partial_output():
     calls, output, passed=run_response(['partial','success'])
-    assert calls==['key-a'] and output==['Tokyo'] and not passed
+    assert calls==['key-a'] and output==['Tokyo'] and passed
 
-def test_llm_exhaustion_is_a_real_failure():
+def test_llm_exhaustion_reports_pause_without_fabricating_an_answer():
     calls, output, passed=run_response(['fail','fail'])
-    assert len(calls)==2 and output==[] and not passed
+    assert len(calls)==2 and passed and len(output)==1
+    assert 'temporarily busy' in output[0] and 'Tokyo' not in output[0]
+
+def test_long_conversation_keeps_instructions_latest_question_and_tool_pair():
+    from provider import bounded_context, request_estimate
+    context=llm.ChatContext()
+    context.add_message(role='system',content='Keep this safety instruction.')
+    for index in range(40):
+        context.add_message(role='user',content=f'Old question {index}. '+'नमस्ते '*60)
+        context.add_message(role='assistant',content='An earlier answer. '*25)
+    context.add_message(role='user',content='What did the clock tool return?')
+    context.items.extend([
+        llm.FunctionCall(call_id='clock-call',name='clock',arguments='{}'),
+        llm.FunctionCallOutput(call_id='clock-call',name='clock',output='12:30',is_error=False),
+    ])
+    original=list(context.items)
+    with patch.dict('os.environ',{'GROQ_TPM_LIMIT':'6000'}):
+        bounded,estimate=bounded_context(context,[])
+    assert estimate<=4096 and request_estimate(bounded,[])==estimate
+    assert bounded.items[0].text_content=='Keep this safety instruction.'
+    assert bounded.items[-3].text_content=='What did the clock tool return?'
+    assert [item.type for item in bounded.items[-2:]]==['function_call','function_call_output']
+    assert len(bounded.items)<len(context.items) and context.items==original
+
+def test_single_oversized_question_is_not_silently_truncated():
+    from provider import bounded_context
+    from shared_store import ProviderBudgetExceeded
+    context=llm.ChatContext();context.add_message(role='user',content='अ'*10000)
+    with pytest.raises(ProviderBudgetExceeded) as error: bounded_context(context,[])
+    assert error.value.reason=='request_size'
+
+def test_expected_budget_pause_does_not_break_next_turn_or_issue_provider_request():
+    from unittest.mock import AsyncMock
+    from shared_store import ProviderBudgetExceeded
+    async def run():
+        engine=PooledGroqLLM(GroqKeyPool(['test-key']))
+        calls=[];notices=AsyncMock();engine.on_notice=notices
+        def select(key): calls.append(key);return FakeEngine('success')
+        engine.engine=select
+        context=llm.ChatContext();context.add_message(role='user',content='Capital of Japan?')
+        results=[]
+        with patch('provider.provider_budget',new=AsyncMock(side_effect=[ProviderBudgetExceeded('minute',12),None])),patch('provider.shared_key_cooldown',new=async_false):
+            for _ in range(2):
+                output=[]
+                async with engine.chat(chat_ctx=context) as stream:
+                    async for chunk in stream: output.append(chunk.delta.content)
+                results.append(''.join(output))
+        assert '12 seconds' in results[0] and results[1]=='Tokyo'
+        assert len(calls)==1
+        assert notices.await_args_list[-1].args==(None,)
+    asyncio.run(run())
+
+def test_recognition_budget_pause_keeps_pipeline_available_for_next_utterance():
+    from agent import GroqWhisperSTT
+    from shared_store import ProviderBudgetExceeded
+    from unittest.mock import AsyncMock
+    from livekit.agents import stt
+    async def run():
+        with patch('agent.get_global_key_pool',return_value=GroqKeyPool(['test-key'])):
+            engine=GroqWhisperSTT()
+        engine.on_notice=AsyncMock()
+        good=stt.SpeechEvent(type=stt.SpeechEventType.FINAL_TRANSCRIPT,alternatives=[stt.SpeechData(language='en',text='Hello')])
+        with patch.object(engine,'_recognize_bounded',new=AsyncMock(side_effect=[ProviderBudgetExceeded('minute',5),good])):
+            paused=await engine._recognize_impl(None)
+            resumed=await engine._recognize_impl(None)
+        assert paused.alternatives==[] and resumed.alternatives[0].text=='Hello'
+        assert '5 seconds' in engine.on_notice.await_args.args[0]
+    asyncio.run(run())
 
 def test_evaluation_exits_nonzero_on_required_failures():
     sys.path.insert(0,str(Path(__file__).parents[1]))
