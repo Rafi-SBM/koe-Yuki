@@ -48,11 +48,11 @@ export function useVoiceSession() {
     setAudioBlocked(false); setIsConnected(false); setIsConnecting(false); setIsSandboxMode(false); setVisualizerState("IDLE");
     setLocalMicTrack(null); setRemoteAgentTrack(null); setConnectionQuality("UNKNOWN"); setPingMs(null); setTurnLatencyMs(null);
   }, [cleanup]);
-  const requestControl = useCallback(async (room: Room, type: string, data: object = {}) => {
+  const requestControl = useCallback(async (room: Room, type: string, data: object = {}, timeoutMs = 20000) => {
     if (pending.current.size >= 10) throw new Error("Too many pending controls");
     const id = crypto.randomUUID();
     const acknowledgement = new Promise<void>((resolve, reject) => { pending.current.set(id, { resolve, reject }); });
-    const timer = setTimeout(() => pending.current.get(id)?.reject(new Error("The voice worker did not acknowledge the request.")), 20000);
+    const timer = setTimeout(() => pending.current.get(id)?.reject(new Error("The voice worker did not acknowledge the request.")), timeoutMs);
     const send = () => room.localParticipant.publishData(encode({ type, id, ...data }), { reliable: true, topic: "yuki.control" });
     const retry = setInterval(() => { void send().catch(() => {}); }, 1500);
     try { await send(); await acknowledgement; } finally { clearTimeout(timer); clearInterval(retry); pending.current.delete(id); }
@@ -123,13 +123,15 @@ export function useVoiceSession() {
       room.on(RoomEvent.ParticipantDisconnected, participant => { if (roomRef.current === room && participant.kind === ParticipantKind.AGENT) { disconnect(); setConfigNotice("The voice worker disconnected. Please try again."); } });
       room.on(RoomEvent.ConnectionStateChanged, state => { if (roomRef.current === room && state === ConnectionState.Disconnected) disconnect(); });
       await room.connect(data.serverUrl, data.token, { peerConnectionTimeout: 15000 });
-      await requestControl(room, "hello");
+      const startupTimeout = Math.min(90000, Math.max(20000, Number(data.startupTimeoutMs) || 20000));
+      if (startupTimeout > 20000) setConfigNotice("Starting Yuki. The first call after a break may take a little longer. Your microphone will turn on when Yuki is ready.");
+      await requestControl(room, "hello", {}, startupTimeout);
       await requestControl(room, "settings", { voice, speed, responseStyle: style });
       if (attempt !== generation.current) return;
       await room.localParticipant.setMicrophoneEnabled(!micMuted.current, { deviceId: deviceId || undefined });
       if (attempt !== generation.current) { room.localParticipant.audioTrackPublications.forEach(publication => publication.track?.stop()); return; }
       extractLocalMicTrack(room); await room.startAudio().catch(() => { setAudioBlocked(true); setConfigNotice("Tap Enable audio to hear Yuki."); });
-      setIsConnected(true); setIsSandboxMode(false); setVisualizerState("LISTENING");
+      setConfigNotice(null); setIsConnected(true); setIsSandboxMode(false); setVisualizerState("LISTENING");
       deadlineTimer.current = setTimeout(() => { disconnect(); setConfigNotice("The call reached its time limit. You can start a new session."); }, Math.max(0, data.deadline - Date.now()));
     } catch (error) {
       if (attempt === generation.current) { disconnect(); setConfigNotice(`Connection could not start: ${error instanceof Error ? error.message : String(error)}`); }

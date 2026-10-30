@@ -448,6 +448,7 @@ async def entrypoint(ctx: JobContext):
 if __name__ == "__main__":
     cli.run_app(
         WorkerOptions(
+            agent_name=os.getenv("LIVEKIT_AGENT_NAME", ""),
             entrypoint_fnc=entrypoint,
             request_fnc=request_job,
             prewarm_fnc=prewarm,

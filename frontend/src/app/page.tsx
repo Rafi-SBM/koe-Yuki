@@ -132,7 +132,7 @@ export default function VoiceHubPage() {
       <VoiceNotice
         message={session.configNotice}
         onResumeAudio={session.audioBlocked ? session.resumeAudio : undefined}
-        onStartSandbox={!session.isConnected ? session.startSandbox : undefined}
+        onStartSandbox={!session.isConnected && !session.isConnecting ? session.startSandbox : undefined}
       />
 
       <VoiceStage
